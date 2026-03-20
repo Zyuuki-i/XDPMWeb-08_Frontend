@@ -1,0 +1,70 @@
+﻿@model IEnumerable<frontend.Models.DanhGia>
+
+@{
+    ViewData["Title"] = "DanhGia";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    List<NguoiDung>? dsNguoiDung = ViewBag.DSKH as List<NguoiDung>;
+    int max = 10;
+}
+<div class="text-center mt-5 mb-4">
+    <h2 class="section-title text-uppercase">Khách hàng nói gì về chúng tôi</h2>
+    <p class="text-muted">Những đánh giá chân thực từ khách hàng đã trải nghiệm sản phẩm tại Zyuuki Music</p>
+</div>
+
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-5">
+    @foreach (var item in Model)
+    {
+        if (item.Sosao >= 4)
+        {
+            if (max-- <= 0) { break; }
+
+            string tenNguoiDung = "Người dùng ẩn danh";
+            string avatarUrl = "~/images/avatar/default.png";
+
+            if (dsNguoiDung != null)
+            {
+                var nd = dsNguoiDung.FirstOrDefault(u => u.MaNd == item.MaNd);
+                if (nd != null)
+                {
+                    tenNguoiDung = nd.Tennd;
+                    if (!string.IsNullOrEmpty(nd.Hinh))
+                    {
+                        avatarUrl = "~/images/avatar/" + nd.Hinh;
+                    }
+                }
+            }
+
+            <div class="col">
+                <div class="review-card">
+                    <div class="quote-icon">“</div>
+
+                    <div class="mb-3 text-warning">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            if (i <= item.Sosao)
+                            {
+                                <i class="bi bi-star-fill"></i>
+                            }
+                            else
+                            {
+                                <i class="bi bi-star text-black-50 opacity-25"></i>
+                            }
+                        }
+                    </div>
+
+                    <div class="review-text">
+                        "@item.Noidung"
+                    </div>
+
+                    <div class="d-flex align-items-center mt-auto border-top pt-3">
+                        <img src="@Url.Content(avatarUrl)" alt="@tenNguoiDung" class="user-avatar-sm me-3">
+                        <div>
+                            <h6 class="fw-bold mb-0 text-dark">@tenNguoiDung</h6>
+                            <small class="text-muted" style="font-size: 0.8rem;">Khách hàng thân thiết</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>

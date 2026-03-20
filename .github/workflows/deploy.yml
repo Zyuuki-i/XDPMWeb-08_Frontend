@@ -1,0 +1,50 @@
+name: Deploy to Somee
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  ftp-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Publish project
+        run: dotnet publish frontend/frontend.csproj -c Release -o publish
+
+      # 1. TẠO file ngoài publish
+      - name: Create app_offline.htm
+        run: echo "Updating..." > app_offline.htm
+
+      # 2. UPLOAD RIÊNG file này
+      - name: Upload app_offline.htm
+        run: |
+          curl -T app_offline.htm ftp://nhom08.somee.com/www.nhom08.somee.com/ \
+          --user ${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}
+
+      # 3. CHỜ IIS nhả file
+      - name: Wait for IIS
+        run: sleep 10
+
+      # 4. UPLOAD PROJECT
+      - name: Upload via FTP
+        uses: SamKirkland/FTP-Deploy-Action@4.3.3
+        with:
+          server: nhom08.somee.com
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: /www.nhom08.somee.com/
+          local-dir: publish/
+      # 5. XÓA app_offline
+      - name: Remove app_offline.htm
+        run: |
+              curl -Q "DELE /www.nhom08.somee.com/app_offline.htm" \
+              ftp://nhom08.somee.com \
+              --user ${{ secrets.FTP_USERNAME }}:${{ secrets.FTP_PASSWORD }}
