@@ -1,0 +1,321 @@
+﻿@model WebApp_BanNhacCu.Models.DonDatHang
+
+@{
+    ViewData["Title"] = "Thanh toán đơn hàng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var dsGiamGia = ViewBag.DsGiamGia as List<GiamGia>;
+    int tong = (int)(Model.ChiTietDonDatHangs.Sum(x => x.Thanhtien) ?? 1);
+
+    string loai = Context.Session.GetString("GG_Loai") ?? "";
+    int pt = Context.Session.GetInt32("GG_PhanTram") ?? 0;
+
+    int tienGiam = 0;
+    int phiShip = 30000;
+
+
+    if (loai.Equals("Voucher", StringComparison.OrdinalIgnoreCase)) {
+        tienGiam = tong * pt / 100;
+    }
+
+    if (loai.Equals("Freeship", StringComparison.OrdinalIgnoreCase)) {
+
+        phiShip = 0;
+    }
+
+    int thanhToan = tong - tienGiam + phiShip;
+}
+@if (TempData["MessageError_MaGiamGia"] != null)
+{
+    <div class="col-12 mt-3">
+        <div class="alert alert-danger text-center fw-bold shadow-sm">
+            <i class="bi bi-exclamation-circle me-2"></i> @TempData["MessageError_MaGiamGia"]
+        </div>
+    </div>
+}
+@if (TempData["MessageSuccess_MaGiamGia"] != null)
+{
+    <div class="col-12 mt-3">
+        <div class="alert alert-success text-center fw-bold shadow-sm">
+            <i class="bi bi-exclamation-circle me-2"></i> @TempData["MessageSuccess_MaGiamGia"]
+        </div>
+    </div>
+}
+<div class="container py-4 bg-gray-100">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-success text-uppercase mb-1">Thanh toán đơn hàng</h2>
+            <span class="step-breadcrumb">Giỏ hàng > <strong>Thanh toán</strong> > Hoàn tất</span>
+        </div>
+        <a class="btn btn-outline-secondary btn-sm" asp-action="Index">
+            <i class="bi bi-arrow-left"></i> Quay lại giỏ hàng
+        </a>
+    </div>
+
+    <form id="formThanhToan" asp-action="ThanhToanCOD" asp-controller="DonDatHang" method="post">
+        <div class="row">
+            <div class="col-lg-8">
+
+                <div class="card card-custom">
+                    <div class="card-header-custom">
+                        <i class="bi bi-geo-alt-fill text-danger me-2"></i>Thông tin giao hàng
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-muted">Họ và tên</label>
+                                <input type="text" class="form-control" name="Tennd" value="@Model.MaNdNavigation.Tennd" required placeholder="Nhập họ tên người nhận">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-muted">Số điện thoại</label>
+                                <input type="text" class="form-control" name="Sdt" value="@Model.MaNdNavigation.Sdt" required placeholder="Nhập số điện thoại">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-muted">Tỉnh / Thành phố</label>
+                                <input type="hidden" id="tinh" value="@Model.MaNdNavigation.Tinhthanh">
+                                <select id="province" name="Tinhthanh" class="form-select" onchange="swapProvince()"></select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-muted">Phường / Xã</label>
+                                <input type="hidden" id="phuong" value="@Model.MaNdNavigation.Phuongxa">
+                                <select id="ward" name="Phuongxa" class="form-select"></select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-bold small text-muted">Địa chỉ chi tiết (Số nhà, đường)</label>
+                                <input type="text" class="form-control" name="Diachi" value="@Model.MaNdNavigation.Diachi" required placeholder="Ví dụ: 123 Đường Nguyễn Văn Cừ">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card card-custom">
+                    <div class="card-header-custom d-flex justify-content-between">
+                        <span><i class="bi bi-bag-check-fill text-primary me-2"></i>Sản phẩm (@Model.ChiTietDonDatHangs.Sum(t => t.Soluong))</span>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-borderless align-middle mb-0">
+                                <thead class="bg-light text-secondary small">
+                                    <tr>
+                                        <th class="ps-4">Sản phẩm</th>
+                                        <th class="text-center">Đơn giá</th>
+                                        <th class="text-center">SL</th>
+                                        <th class="text-end pe-4">Thành tiền</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var chiTiet in Model.ChiTietDonDatHangs)
+                                    {
+                                        <tr class="border-bottom">
+                                            <td class="ps-4 py-3">
+                                                <div class="fw-bold text-dark">@chiTiet.MaSpNavigation.Tensp</div>
+                                            </td>
+                                            <td class="text-center text-muted">@String.Format("{0:N0}", chiTiet.Gia)₫</td>
+                                            <td class="text-center">x @chiTiet.Soluong</td>
+                                            <td class="text-end pe-4 fw-bold">@String.Format("{0:N0}", chiTiet.Thanhtien)₫</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card card-custom">
+                    <div class="card-header-custom">
+                        <i class="bi bi-credit-card-2-front-fill text-warning me-2"></i>Phương thức thanh toán
+                    </div>
+                    <div class="card-body p-4">
+                        <select id="ptTT" name="ptTT" class="form-select form-select-lg mb-2">
+                            <option value="1" selected>💵 Thanh toán khi nhận hàng (COD)</option>
+                            <option value="2">💳 Chuyển khoản / VNPay</option>
+                        </select>
+                        <small class="text-muted fst-italic ms-1" id="paymentNote">Bạn sẽ thanh toán bằng tiền mặt khi shipper giao hàng đến.</small>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-lg-4">
+                <div class="checkout-summary">
+
+                    <div class="card card-custom">
+                        <div class="card-header-custom">
+                            <i class="bi bi-person-vcard me-2"></i>Thông tin khách hàng
+                        </div>
+                        <div class="card-body p-3">
+                            <div class="customer-info-static">
+                                <div class="mb-2">
+                                    <small class="text-muted d-block">Họ tên:</small>
+                                    <span class="fw-bold text-dark">@Model.MaNdNavigation.Tennd</span>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted d-block">Số điện thoại:</small>
+                                    <span class="fw-bold text-dark">@Model.MaNdNavigation.Sdt</span>
+                                </div>
+                                <div class="mb-0">
+                                    <small class="text-muted d-block">Địa chỉ:</small>
+                                    <span class="small text-dark">
+                                        @Model.MaNdNavigation.Diachi, @Model.MaNdNavigation.Phuongxa, @Model.MaNdNavigation.Tinhthanh
+                                    </span>
+                                </div>
+                            </div>                      
+                        </div>
+                    </div>
+
+                    <div class="card card-custom">
+                        <div class="card-header-custom">
+                            <i class="bi bi-ticket-perforated-fill text-success me-2"></i>Mã giảm giá
+                        </div>
+                        <div class="card-body p-3" style="max-height: 250px; overflow-y: auto;">
+                            @if (dsGiamGia != null && dsGiamGia.Any())
+                            {
+                                <select id="selectVoucher" name="MaGg" class="form-select" onchange="chonMa(this.value)">
+                                    <option value="">-- Chọn Voucher --</option>
+                                    @foreach (var gg in dsGiamGia)
+                                    {
+                                        string statusClass = "text-success";
+                                        string icon = "💸";
+                                        if (gg.Loaima != null && gg.Loaima.Equals("Voucher", StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            statusClass = "text-danger";
+                                            icon = "🏷️";
+                                        }
+                                        <option value="@gg.MaGg"
+                                                selected="@(Context.Session.GetString("GG_Ma") == gg.MaGg ? "selected" : null)" class="@statusClass">
+                                            @(icon + gg.Tenma + " (-" + gg.Phantramgiam + "%)" + " • Từ " + String.Format("{0:N0}", gg.Dieukien) + "đ")
+                                        </option>
+                                    }
+                                </select>
+                            }
+                            else
+                            {
+                                <p class="text-muted text-center small mb-0">Không có mã giảm giá khả dụng</p>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="card card-custom border-top-5 border-success">
+                        <div class="card-body p-4">
+                            <h5 class="fw-bold mb-3">Tổng cộng</h5>
+
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Tạm tính:</span>
+                                <span class="fw-bold">@String.Format("{0:N0}", tong)₫</span>
+                            </div>
+
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Phí vận chuyển:</span>
+                                <span>
+                                    @if (phiShip == 0)
+                                    {
+                                        <span class="badge bg-success">Miễn phí</span>
+                                    }
+                                    else
+                                    {
+
+                                        <span>@String.Format("{0:N0}", phiShip)₫</span>
+                                    }
+                                </span>
+                            </div>
+
+                            @if (tienGiam > 0)
+                            {
+                                <div class="d-flex justify-content-between mb-2 text-success">
+                                    <span><i class="bi bi-tag-fill me-1"></i>Giảm giá:</span>
+                                    <span>-@String.Format("{0:N0}", tienGiam)₫</span>
+                                </div>
+                            }
+
+                            <hr class="my-3">
+
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <span class="fw-bold fs-5">Thanh toán:</span>
+                                <span class="fw-bold fs-4 text-danger">@String.Format("{0:N0}", thanhToan)₫</span>
+                            </div>
+
+                            <button type="submit" id="btnThanhToan" class="btn btn-success w-100 py-3 fw-bold text-uppercase shadow-sm">
+                                Đặt hàng ngay
+                            </button>
+                            <p class="text-center small text-muted mt-2 mb-0">Nhấn "Đặt hàng" đồng nghĩa với việc bạn đồng ý tuân theo điều khoản của chúng tôi.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    const selectPT = document.getElementById('ptTT');
+    const formThanhToan = document.getElementById('formThanhToan');
+    const btnThanhToan = document.getElementById('btnThanhToan');
+    const note = document.getElementById('paymentNote');
+    let tinh = document.getElementById('tinh').value;
+    let phuong = document.getElementById('phuong').value;
+
+    selectPT.addEventListener('change', function () {
+        if (this.value === "2") {
+            formThanhToan.action = '@Url.Action("ThanhToanVNPay", "DonDatHang")';
+            btnThanhToan.textContent = 'Thanh toán qua VNPay';
+            btnThanhToan.className = 'btn btn-primary w-100 py-3 fw-bold text-uppercase shadow-sm';
+            note.textContent = "Bạn sẽ được chuyển hướng đến cổng thanh toán VNPay.";
+        } else {
+            formThanhToan.action = '@Url.Action("ThanhToanCOD", "DonDatHang")';
+            btnThanhToan.textContent = 'Đặt hàng ngay';
+            btnThanhToan.className = 'btn btn-success w-100 py-3 fw-bold text-uppercase shadow-sm';
+            note.textContent = "Bạn sẽ thanh toán bằng tiền mặt khi shipper giao hàng đến.";
+        }
+    });
+
+    let allProvinces = [];
+
+    fetch("/Address/GetFullProvinceData")
+        .then(res => res.json())
+        .then(data => {
+            allProvinces = data;
+
+            data.forEach(p => {
+                $("#province").append(`
+                    <option value="${p.name}" ${p.name === tinh ? "selected" : ""}>
+                        ${p.name}
+                    </option>
+                `);
+            });
+
+            loadWards();
+        });
+
+    function loadWards() {
+        let thanh = $("#province").val();
+        $("#ward").empty();
+
+        let selectedProvince = allProvinces.find(p => p.name === thanh);
+        if (!selectedProvince) return;
+
+        selectedProvince.wards.forEach(w => {
+            $("#ward").append(`
+                <option value="${w.name}" ${w.name === phuong ? "selected" : ""}>
+                    ${w.name}
+                </option>
+            `);
+        });
+    }
+
+    function swapProvince(){
+        phuong = ""; 
+        loadWards();
+    };
+
+    function chonMa(maGg) {
+        window.location.href = '/DonDatHang/ApDungMa?maGg=' + maGg;
+    }
+
+    const alertBox = document.querySelector(".alert");
+        if (alertBox) {
+            setTimeout(() => {
+                alertBox.classList.remove("show");
+                setTimeout(() => alertBox.remove(), 500);
+            }, 3000);
+        }
+</script>

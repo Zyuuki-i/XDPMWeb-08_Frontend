@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace frontend.Models
+namespace WebApp_BanNhacCu.Models
 {
     public partial class ChiTietGiamGia
     {

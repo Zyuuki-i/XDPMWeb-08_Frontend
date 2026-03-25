@@ -1,0 +1,116 @@
+﻿@inject IHttpContextAccessor HttpContextAccessor
+@{
+    string role = HttpContextAccessor.HttpContext?.Session.GetString("UserRole") ?? "";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trang Chủ Quản Lý - Zyuuki Music</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="d-flex">
+        <aside class="admin-sidebar shadow-sm">
+            <div class="text-center mb-4">
+                <a href="/" class="text-decoration-none">
+                    <img src="~/images/logo.png" alt="Logo" class="img-fluid mb-2" style="max-height: 60px;" />
+                </a>
+                <div class="sidebar-title mt-2">Hệ Thống Quản Lý</div>
+            </div>
+
+            <nav class="nav flex-column mt-3" id="admin-nav">
+                <a class="sidebar-link mb-1" asp-area="Admin" asp-controller="SanPham" asp-action="Index">
+                    <i class="bi bi-box-seam"></i> Sản Phẩm
+                </a>
+                <a class="sidebar-link mb-1" asp-area="Admin" asp-controller="NSX" asp-action="Index">
+                    <i class="bi bi-building"></i> Nhà Sản Xuất
+                </a>
+                <a class="sidebar-link mb-1" asp-area="Admin" asp-controller="Loai" asp-action="Index">
+                    <i class="bi bi-tags"></i> Loại Sản Phẩm
+                </a>
+                <a class="sidebar-link mb-1" asp-area="Admin" asp-controller="TaiKhoan" asp-action="Index">
+                    <i class="bi bi-people"></i> Tài Khoản
+                </a>
+
+                @if (role == "Admin")
+                {
+                    <a class="sidebar-link mb-1" asp-area="Admin" asp-controller="NhanVien" asp-action="Index">
+                        <i class="bi bi-person-badge"></i> Nhân Viên
+                    </a>
+                }
+
+                <a class="sidebar-link mb-1" asp-area="Admin" asp-controller="DonDatHang" asp-action="Index">
+                    <i class="bi bi-file-earmark-text"></i> Đơn Hàng
+                </a>
+                <a class="sidebar-link mb-1" asp-area="Admin" asp-controller="GiaoHang" asp-action="Index">
+                    <i class="bi bi-truck"></i> Giao Hàng
+                </a>
+                <a class="sidebar-link mb-1" asp-area="Admin" asp-controller="GiamGia" asp-action="Index">
+                    <i class="bi bi-percent"></i> Giảm Giá
+                </a>
+
+                @if (role == "Admin")
+                {
+                    <a class="sidebar-link mb-1" asp-area="Admin" asp-controller="ThongKe" asp-action="Index">
+                        <i class="bi bi-graph-up-arrow"></i> Thống Kê
+                    </a>
+                }
+
+                <hr class="text-muted" />
+                <a class="sidebar-link text-danger" asp-area="" asp-controller="TaiKhoan" asp-action="DangXuat">
+                    <i class="bi bi-box-arrow-right"></i> Đăng Xuất
+                </a>
+            </nav>
+        </aside>
+
+        <div class="admin-main-content">
+            <header class="bg-white border-bottom p-3 mb-4 d-flex justify-content-between align-items-center shadow-sm">
+                <span class="text-muted">Chào mừng trở lại, <strong>@role</strong></span>
+                <div class="user-menu">
+                    <span class="badge badge-soft-success px-3 py-2">
+                        Time: @DateTime.Now.ToString("dd/MM/yyyy HH:mm")
+                    </span>
+                </div>
+            </header>
+
+            <main role="main" class="px-4 pb-5">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+         document.addEventListener("DOMContentLoaded", function () {
+            // Lấy đường dẫn hiện tại của trình duyệt
+            const currentPath = window.location.pathname;
+
+            // Chọn tất cả các thẻ <a> có class 'sidebar-link' bên trong #admin-nav
+            const navLinks = document.querySelectorAll('#admin-nav a.sidebar-link');
+
+            navLinks.forEach(function (link) {
+                // Lấy giá trị thuộc tính href
+                const linkHref = link.getAttribute('href');
+
+                // Thực hiện kiểm tra logic tương tự
+                if (currentPath === linkHref || (linkHref !== "/" && currentPath.startsWith(linkHref))) {
+                    link.classList.add('active');
+                } else {
+                    // Đảm bảo loại bỏ class active nếu không khớp (đề phòng trường hợp cache)
+                    link.classList.remove('active');
+                }
+            });
+        });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

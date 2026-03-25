@@ -1,10 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace frontend.Models
+namespace WebApp_BanNhacCu.Models
 {
     public partial class NguoiDung
     {
+        public NguoiDung()
+        {
+            ChiTietGiamGia = new HashSet<ChiTietGiamGia>();
+            DanhGia = new HashSet<DanhGia>();
+            DonDatHangs = new HashSet<DonDatHang>();
+        }
+
         public int MaNd { get; set; }
         public string Tennd { get; set; } = null!;
         public string Matkhau { get; set; } = null!;
@@ -16,5 +23,8 @@ namespace frontend.Models
         public string? Hinh { get; set; }
         public bool? Trangthai { get; set; }
 
+        public virtual ICollection<ChiTietGiamGia> ChiTietGiamGia { get; set; }
+        public virtual ICollection<DanhGia> DanhGia { get; set; }
+        public virtual ICollection<DonDatHang> DonDatHangs { get; set; }
     }
 }

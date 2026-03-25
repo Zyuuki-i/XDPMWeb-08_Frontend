@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace frontend.Models
+namespace WebApp_BanNhacCu.Models
 {
     public partial class Hinh
     {
@@ -9,5 +9,6 @@ namespace frontend.Models
         public string MaSp { get; set; } = null!;
         public string? Tenhinh { get; set; }
 
+        public virtual SanPham MaSpNavigation { get; set; } = null!;
     }
 }

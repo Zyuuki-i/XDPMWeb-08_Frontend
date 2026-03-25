@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using frontend.Models;
+using WebApp_BanNhacCu.Models;
 
 namespace WebApp_BanNhacCu.ViewComponent
 {
@@ -7,9 +7,8 @@ namespace WebApp_BanNhacCu.ViewComponent
     {
         public IViewComponentResult Invoke()
         {
-            //DonDatHang ddh = MySession.Get<DonDatHang>(HttpContext.Session, "tempDdh");
-            //int sl = ddh == null ? 0 : ddh.ChiTietDonDatHangs.Count();
-            int sl = 0;
+            DonDatHang ddh = MySession.Get<DonDatHang>(HttpContext.Session, "tempDdh");
+            int sl = ddh == null ? 0 : ddh.ChiTietDonDatHangs.Count();
             ViewBag.SoLuongGio = sl;
             return View(sl);
         }

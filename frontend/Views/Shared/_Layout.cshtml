@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/frontend.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/WebApp_BanNhacCu.styles.css" asp-append-version="true" />
 </head>
 <body class="d-flex flex-column mb-0" style="height: fit-content;">
     @using Microsoft.AspNetCore.Http
@@ -88,23 +88,21 @@
                                                 <i class="bi bi-person-vcard me-2"></i> Hồ sơ cá nhân
                                             </a>
                                         </li>
-                                        @if (userRole == "Admin" || userRole == "Staff")
+                                        @if(userRole == "Admin" || userRole == "Staff")
                                         {
                                             <li>
                                                 <a class="dropdown-item" asp-area="Admin" asp-controller="Home" asp-action="Index">
                                                     <i class="bi bi-speedometer2 me-2"></i> Quản trị hệ thống
                                                 </a>
                                             </li>
-                                        }
-                                        else if (userRole == "Carrier")
+                                        }else if(userRole == "Carrier")
                                         {
                                             <li>
                                                 <a class="dropdown-item" asp-area="Carrier" asp-controller="Home" asp-action="Index">
                                                     <i class="bi bi-truck me-2"></i> Quản lý vận chuyển
                                                 </a>
                                             </li>
-                                        }
-                                        else
+                                        } else
                                         {
                                             <li>
                                                 <a class="dropdown-item" asp-controller="TaiKhoan" asp-action="lichSuDDH" asp-route-id="@HttpContextAccessor.HttpContext.Session.GetInt32("UserId")">
@@ -139,77 +137,54 @@
         </main>
     </div>
 
-    <footer class="pt-5 pb-3 zyuuki-footer">
+    <footer class="pt-5 pb-3 bg-dark text-light">
         <div class="container">
             <div class="row gy-4">
-                <div class="col-lg-4 col-md-6">
-                    <h5 class="text-warning mb-3 fw-bold">Về Zyuuki Music</h5>
-                    <p class="small text-light" style="line-height: 1.6;">
-                        Chúng tôi chuyên cung cấp các loại nhạc cụ Piano, Guitar, Violin chính hãng với giá tốt nhất thị trường cùng chế độ bảo hành uy tín.
-                    </p>
-                    <div class="mt-4">
-                        <a href="#" class="footer-social-link me-2"><i class="bi bi-facebook"></i></a>
-                        <a href="#" class="footer-social-link me-2"><i class="bi bi-youtube"></i></a>
-                        <a href="#" class="footer-social-link"><i class="bi bi-tiktok"></i></a>
+                <div class="col-md-4">
+                    <h5>Về Zyuuki Music</h5>
+                    <p class="small">Chúng tôi chuyên cung cấp các loại nhạc cụ Piano, Guitar, Violin chính hãng với giá tốt nhất thị trường cùng chế độ bảo hành uy tín.</p>
+                    <div class="mt-3">
+                        <a href="#" class="me-3 fs-5"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="me-3 fs-5"><i class="bi bi-youtube"></i></a>
+                        <a href="#" class="me-3 fs-5"><i class="bi bi-tiktok"></i></a>
                     </div>
                 </div>
 
-                <div class="col-lg-4 col-md-6">
-                    <h5 class="text-warning mb-3 fw-bold">Thông Tin Liên Hệ</h5>
-                    <ul class="list-unstyled small" style="line-height: 2;">
-                        <li class="d-flex align-items-start mb-2">
-                            <i class="bi bi-geo-alt-fill text-warning me-3 mt-1"></i>
-                            <span>180 Cao Lỗ, Phường 4, Quận 8, TP.HCM</span>
-                        </li>
-                        <li class="d-flex align-items-center mb-2">
-                            <i class="bi bi-telephone-fill text-warning me-3"></i>
-                            <span>0869 347 040</span>
-                        </li>
-                        <li class="d-flex align-items-center mb-2">
-                            <i class="bi bi-envelope-fill text-warning me-3"></i>
-                            <span>dh52200473@student.stu.edu.vn</span>
-                        </li>
+                <div class="col-md-4">
+                    <h5>Thông Tin Liên Hệ</h5>
+                    <ul class="list-unstyled small">
+                        <li class="mb-2"><i class="bi bi-geo-alt-fill me-2 text-warning"></i> 180 Cao Lỗ, Phường 4, Quận 8, TP.HCM</li>
+                        <li class="mb-2"><i class="bi bi-telephone-fill me-2 text-warning"></i> 0869 347 040</li>
+                        <li class="mb-2"><i class="bi bi-envelope-fill me-2 text-warning"></i> dh52200473@student.stu.edu.vn</li>
                     </ul>
                 </div>
 
-                <div class="col-lg-4 col-md-12">
-                    <h5 class="text-warning mb-3 fw-bold">Đội Ngũ Thực Hiện</h5>
-                    <div class="row g-2 border-start border-secondary border-opacity-50 ps-3">
-                        <div class="col-6 mb-2">
-                            <div class="team-member-name fw-semibold">Lê Văn Đạt</div>
-                            <div class="team-member-id">DH52200473</div>
-                        </div>
-                        <div class="col-6 mb-2">
-                            <div class="team-member-name fw-semibold">Nguyễn Thanh Sang</div>
-                            <div class="team-member-id">DH52201360</div>
-                        </div>
-                        <div class="col-6 mb-2">
-                            <div class="team-member-name fw-semibold">Kheo Hoàng Trung</div>
-                            <div class="team-member-id">DH52201668</div>
-                        </div>
-                        <div class="col-6 mb-2">
-                            <div class="team-member-name fw-semibold">Nguyễn Ngọc Trung Quý</div>
-                            <div class="team-member-id">DH52201331</div>
-                        </div>
-                        <div class="col-6 mb-0">
-                            <div class="team-member-name fw-semibold">Nguyễn Hồ Phúc Thịnh</div>
-                            <div class="team-member-id">DH52201498</div>
-                        </div>
-                    </div>
+                <div class="col-md-4">
+                    <h5>Đội Ngũ Thực Hiện</h5>
+                    <ul class="list-unstyled student-info ps-2 border-start border-secondary">
+                        <li>
+                            <strong>Lê Văn Đạt</strong><br>
+                            <span class="text-secondary">MSSV: DH52200473 - Lớp: D22_TH06</span>
+                        </li>
+                        <li class="mt-3">
+                            <strong>Võ Chung Khánh Đăng</strong><br>
+                            <span class="text-secondary">MSSV: DH52200446 - Lớp: D22_TH06</span>
+                        </li>
+                    </ul>
                 </div>
             </div>
 
-            <hr class="border-secondary mt-4 mb-3 opacity-25" />
+            <hr class="border-secondary mt-3 mb-3" />
             <div class="text-center small text-secondary">
-                &copy; 2026 - <strong class="text-light">Zyuuki Music Store</strong>. All rights reserved.
+                &copy; 2025 - <strong>Zyuuki Music Store</strong>. All rights reserved.
             </div>
         </div>
     </footer>
 </body>
-<script src="~/lib/jquery/dist/jquery.min.js"></script>
-<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
-<script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
-<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-<script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </html>

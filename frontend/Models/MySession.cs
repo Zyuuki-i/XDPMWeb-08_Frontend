@@ -1,7 +1,7 @@
 ﻿
 using Newtonsoft.Json;
 
-namespace frontend.Models
+namespace WebApp_BanNhacCu.Models
 {
     public class MySession
     {

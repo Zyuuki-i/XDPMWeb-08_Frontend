@@ -1,0 +1,100 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Zyuuki Music Carrier</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="carrier-wrapper">
+        <aside class="carrier-sidebar shadow-sm">
+            <div class="text-center mb-4">
+                <a href="/" class="text-decoration-none">
+                    <img src="~/images/logo.png" alt="Logo" class="img-fluid" style="max-height: 60px;" />
+                </a>
+            </div>
+
+            <div class="sidebar-title">Giao Hàng</div>
+
+            <nav class="nav flex-column mt-3" id="carrier-nav">
+                <a class="sidebar-link mb-1" asp-area="Carrier" asp-controller="Home" asp-action="Index">
+                    <i class="bi bi-box-seam"></i> Đơn hàng mới
+                </a>
+                <a class="sidebar-link mb-1" asp-area="Carrier" asp-controller="Home" asp-action="donHoanThanh">
+                    <i class="bi bi-check2-all"></i> Đơn hoàn thành
+                </a>
+                <a class="sidebar-link mb-1" asp-area="Carrier" asp-controller="Home" asp-action="donThatBai">
+                    <i class="bi bi-exclamation-octagon"></i> Đơn thất bại
+                </a>
+
+                <hr class="my-3" style="color: #eee;" />
+
+                <a class="sidebar-link text-danger" asp-area="" asp-controller="TaiKhoan" asp-action="DangXuat">
+                    <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                </a>
+            </nav>
+        </aside>
+
+        <div class="carrier-main">
+            <header class="bg-white border-bottom p-3 mb-4 d-flex justify-content-between align-items-center shadow-sm">
+                <div class="breadcrumb-custom mb-0">
+                    <span class="text-muted"><i class="bi bi-truck me-2"></i>Khu vực Shipper</span>
+                </div>
+                <div>
+                    <span class="badge badge-soft-success px-3 py-2">
+                        Time: @DateTime.Now.ToString("dd/MM/yyyy HH:mm")
+                    </span>
+                </div>
+            </header>
+
+            <main role="main" class="px-4 pb-5">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Lấy đường dẫn hiện tại và chuyển về chữ thường để so sánh
+            const currentPath = window.location.pathname.toLowerCase();
+            const navLinks = document.querySelectorAll('.sidebar-link');
+
+            navLinks.forEach(link => {
+                const linkHref = link.getAttribute('href').toLowerCase();
+
+                // Xử lý logic Active
+                // 1. Nếu khớp chính xác hoàn toàn
+                if (currentPath === linkHref) {
+                    link.classList.add('active');
+                }
+                // 2. Nếu linkHref là trang chủ của Carrier ("/carrier"),
+                // chỉ active nếu currentPath thực sự là trang chủ đó
+                else if (linkHref === "/carrier" || linkHref === "/carrier/") {
+                    if (currentPath === "/carrier" || currentPath === "/carrier/") {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                }
+                // 3. Cho các trang con (ví dụ: đang ở trang xem chi tiết của một mục)
+                else if (linkHref !== "/" && currentPath.startsWith(linkHref + "/")) {
+                    link.classList.add('active');
+                }
+                else {
+                    link.classList.remove('active');
+                }
+            });
+        });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

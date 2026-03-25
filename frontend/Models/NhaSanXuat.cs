@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace frontend.Models
+namespace WebApp_BanNhacCu.Models
 {
     public partial class NhaSanXuat
     {
+        public NhaSanXuat()
+        {
+            SanPhams = new HashSet<SanPham>();
+        }
 
         public string MaNsx { get; set; } = null!;
         public string Tennsx { get; set; } = null!;
@@ -12,5 +16,6 @@ namespace frontend.Models
         public string? Sdt { get; set; }
         public string? Email { get; set; }
 
+        public virtual ICollection<SanPham> SanPhams { get; set; }
     }
 }

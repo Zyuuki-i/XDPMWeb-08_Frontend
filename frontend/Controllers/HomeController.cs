@@ -1,13 +1,15 @@
-﻿using System.Diagnostics;
-using frontend.Models;
-using frontend.MyModels;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
+using WebApp_BanNhacCu.Models;
 
-namespace frontend.Controllers
+namespace WebApp_BanNhacCu.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+
+        ZyuukiMusicStoreContext db = new ZyuukiMusicStoreContext();
 
         public HomeController(ILogger<HomeController> logger)
         {
@@ -16,8 +18,14 @@ namespace frontend.Controllers
 
         public IActionResult Index()
         {
-            ViewBag.DsHinh = XulyHinh.getDSHinh();
-            List<SanPham> dsSP = XulySanPham.getDSSanpham().Take(8).ToList();
+            ViewBag.DsHinh = db.Hinhs
+                                        .GroupBy(t => t.MaSp)
+                                        .Select(g => g.First())
+                                        .ToList();
+            List<SanPham> dsSP = db.SanPhams
+                                            .Include(sp => sp.MaLoaiNavigation)
+                                            .Include(sp => sp.MaNsxNavigation)
+                                            .Take(8).ToList();
             return View(dsSP);
         }
 
@@ -28,8 +36,8 @@ namespace frontend.Controllers
 
         public IActionResult DanhGia()
         {
-            List<DanhGia> dg = XulyDanhgia.getDSDanhgia();
-            List<NguoiDung> nd = XulyNguoidung.getDSNguoidung();
+            List<DanhGia> dg = db.DanhGia.ToList();
+            List<NguoiDung> nd = db.NguoiDungs.ToList();
             ViewBag.DSKH = nd;
             return View(dg);
         }

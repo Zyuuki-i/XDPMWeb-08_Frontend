@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace frontend.Models
+namespace WebApp_BanNhacCu.Models
 {
     public partial class DanhGia
     {
@@ -10,5 +10,7 @@ namespace frontend.Models
         public string? Noidung { get; set; }
         public int? Sosao { get; set; }
 
+        public virtual NguoiDung MaNdNavigation { get; set; } = null!;
+        public virtual SanPham MaSpNavigation { get; set; } = null!;
     }
 }
