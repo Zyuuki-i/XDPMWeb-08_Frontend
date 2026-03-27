@@ -1,0 +1,617 @@
+﻿using frontend.Models;
+using frontend.MyModels;
+using frontend.Payments;
+using Microsoft.AspNetCore.Mvc;
+
+namespace frontend.Controllers
+{
+    public class DonDatHangController : Controller
+    {
+        public IActionResult Index()
+        {
+            DonDatHang ddh = MySession.Get<DonDatHang>(HttpContext.Session, "tempDdh");
+            List<ChiTietDonDatHang>? dsCT = null;
+            if (ddh == null)
+            {
+                dsCT = new List<ChiTietDonDatHang>();
+            }
+            else
+            {
+                dsCT = ddh.ChiTietDonDatHangs.ToList();
+                dsCT.ForEach(ct => ct.MaSpNavigation = XulySanPham.getSanpham(ct.MaSp) ?? new SanPham());
+                List<Hinh> dsHinh = new List<Hinh>();
+                foreach (ChiTietDonDatHang ct in dsCT)
+                {
+                    Hinh? hinh = XulyHinh.getDSHinhByMasp(ct.MaSp)?.FirstOrDefault();
+                    if (hinh != null)
+                    {
+                        dsHinh.Add(hinh);
+                    }
+                }
+                ViewBag.DsHinh = dsHinh;
+            }
+            HttpContext.Session.Remove("GG_Ma");
+            HttpContext.Session.Remove("GG_Loai");
+            HttpContext.Session.Remove("GG_PhanTram");
+            return View(dsCT);
+        }
+
+        private DonDatHang? donDatHang(ref bool flag, string id, int soluong)
+        {
+            SanPham? sp = XulySanPham.getSanpham(id);
+            if (sp == null)
+            {
+                return null;
+            }
+            if (soluong <= 0) { soluong = 1; }
+            DonDatHang ddh = MySession.Get<DonDatHang>(HttpContext.Session, "tempDdh");
+            if (ddh == null)
+            {
+                ddh = new DonDatHang();
+            }
+            ChiTietDonDatHang? ct = null;
+            foreach (ChiTietDonDatHang a in ddh.ChiTietDonDatHangs.Where(t => t.MaSp == sp.MaSp))
+            {
+                ct = a; break;
+            }
+            if (ct == null)
+            {
+                if (sp.Soluongton < soluong) { flag = true; }
+                else
+                {
+                    flag = false;
+                    ct = new ChiTietDonDatHang();
+                    ct.MaSp = sp.MaSp;
+                    ct.Soluong = soluong;
+                    ct.Gia = sp.Giasp;
+                    ct.Thanhtien = soluong * sp.Giasp;
+                    ddh.ChiTietDonDatHangs.Add(ct);
+                }
+            }
+            else
+            {
+                foreach (ChiTietDonDatHang a in ddh.ChiTietDonDatHangs.Where(t => t.MaSp == sp.MaSp))
+                {
+                    if (sp.Soluongton < a.Soluong + soluong) { flag = true; }
+                    else
+                    {
+                        flag = false;
+                        a.Soluong += soluong;
+                    }
+                }
+            }
+            MySession.Set<DonDatHang>(HttpContext.Session, "tempDdh", ddh);
+            return ddh;
+        }
+
+        public IActionResult themVaoGio(string id, int soluong)
+        {
+            bool flag = false;
+            DonDatHang? ddh = donDatHang(ref flag, id, soluong);
+            if (ddh == null)
+            {
+                return RedirectToAction("Index", "SanPham");
+            }
+            if (flag)
+            {
+                TempData["MessageError_GioHang"] = "Số lượng sản phẩm trong kho không đủ để đáp ứng yêu cầu của bạn!";
+            }
+            else
+            {
+                TempData["MessageSuccess_GioHang"] = "Thêm sản phẩm vào giỏ hàng thành công!";
+            }
+            return Redirect(Request.Headers["Referer"].ToString());
+        }
+
+
+        public IActionResult xoaKhoiGio(string id)
+        {
+            DonDatHang ddh = MySession.Get<DonDatHang>(HttpContext.Session, "tempDdh");
+            if (ddh != null)
+            {
+                ChiTietDonDatHang? ct = null;
+                foreach (ChiTietDonDatHang a in ddh.ChiTietDonDatHangs.Where(t => t.MaSp == id))
+                {
+                    ct = a; break;
+                }
+                if (ct != null)
+                {
+                    ddh.ChiTietDonDatHangs.Remove(ct);
+                    MySession.Set<DonDatHang>(HttpContext.Session, "tempDdh", ddh);
+                }
+            }
+            return RedirectToAction("Index");
+        }
+
+        public IActionResult muaNgay(string id, int soluong)
+        {
+            bool flag = false;
+            DonDatHang? ddh = donDatHang(ref flag, id, soluong);
+            if (ddh == null)
+            {
+                return RedirectToAction("Index", "SanPham");
+            }
+            if (flag)
+            {
+                TempData["MessageError_MuaNgay"] = "Số lượng sản phẩm trong kho không đủ để đáp ứng yêu cầu của bạn!";
+                return RedirectToAction("Index", "SanPham");
+            }
+            return RedirectToAction("Index");
+        }
+
+        public IActionResult tangSL(string id)
+        {
+            DonDatHang ddh = MySession.Get<DonDatHang>(HttpContext.Session, "tempDdh");
+            if (ddh != null)
+            {
+                ChiTietDonDatHang? ct = null;
+                foreach (ChiTietDonDatHang a in ddh.ChiTietDonDatHangs.Where(t => t.MaSp == id))
+                {
+                    ct = a; break;
+                }
+                if (ct != null)
+                {
+                    SanPham? sp = XulySanPham.getSanpham(id);
+                    if (sp != null)
+                    {
+                        if (sp.Soluongton < ct.Soluong + 1)
+                        {
+                            TempData["MessageError_DonHang"] = "Số lượng sản phẩm trong kho không đủ để đáp ứng yêu cầu của bạn!";
+                            return RedirectToAction("Index");
+                        }
+                        ct.Soluong += 1;
+                        ct.Thanhtien = ct.Soluong * ct.Gia;
+                    }
+                    MySession.Set<DonDatHang>(HttpContext.Session, "tempDdh", ddh);
+                }
+            }
+            return RedirectToAction("Index");
+        }
+
+        public IActionResult giamSL(string id)
+        {
+            DonDatHang ddh = MySession.Get<DonDatHang>(HttpContext.Session, "tempDdh");
+            if (ddh != null)
+            {
+                ChiTietDonDatHang? ct = null;
+                foreach (ChiTietDonDatHang a in ddh.ChiTietDonDatHangs.Where(t => t.MaSp == id))
+                {
+                    ct = a; break;
+                }
+                if (ct != null)
+                {
+                    if (ct.Soluong <= 1)
+                    {
+                        ddh.ChiTietDonDatHangs.Remove(ct);
+                    }
+                    else
+                    {
+                        ct.Soluong -= 1;
+                        ct.Thanhtien = ct.Soluong * ct.Gia;
+                    }
+                    MySession.Set<DonDatHang>(HttpContext.Session, "tempDdh", ddh);
+                }
+            }
+            return RedirectToAction("Index");
+        }
+
+        public IActionResult capNhatSL(string id, string sl)
+        {
+            DonDatHang ddh = MySession.Get<DonDatHang>(HttpContext.Session, "tempDdh");
+            if (ddh != null)
+            {
+                ChiTietDonDatHang? ct = null;
+                foreach (ChiTietDonDatHang a in ddh.ChiTietDonDatHangs.Where(t => t.MaSp == id))
+                {
+                    ct = a; break;
+                }
+                if (ct != null)
+                {
+                    SanPham? sp = XulySanPham.getSanpham(id);
+                    int soLuongMoi = int.Parse(sl);
+                    if (sp != null && sp.Soluongton < soLuongMoi)
+                    {
+                        TempData["MessageError_DonHang"] = "Số lượng sản phẩm trong kho không đủ để đáp ứng yêu cầu của bạn!";
+                        return RedirectToAction("Index");
+                    }
+                    ct.Soluong = soLuongMoi;
+                    ct.Thanhtien = ct.Soluong * ct.Gia;
+                    MySession.Set<DonDatHang>(HttpContext.Session, "tempDdh", ddh);
+                }
+            }
+            return RedirectToAction("Index");
+        }
+
+        public IActionResult thanhToan(string user)
+        {
+            if (!string.IsNullOrEmpty(user))
+            {
+                NguoiDung? nd = XulyNguoidung.getNguoidungByEmail(user);
+                if (nd != null)
+                {
+                    HttpContext.Session.SetString("USER_EMAIL", user);
+                    DonDatHang ddh = MySession.Get<DonDatHang>(HttpContext.Session, "tempDdh");
+                    if (ddh == null || ddh.ChiTietDonDatHangs.Count == 0)
+                    {
+                        TempData["MessageError"] = "Đơn hàng chưa được tạo!";
+                        return RedirectToAction("Index", "Home");
+                    }
+                    ddh.MaNd = nd.MaNd;
+                    ddh.Tongtien = ddh.ChiTietDonDatHangs.Sum(t => t.Thanhtien);
+                    var dsGiamGia = XulyChiTietGiamGia.getChiTietGiamGiaByNguoiDung(nd.MaNd);
+
+                    ViewBag.DsGiamGia = dsGiamGia;
+                    ddh.MaNdNavigation = nd;
+                    foreach (ChiTietDonDatHang ct in ddh.ChiTietDonDatHangs)
+                    {
+                        SanPham? sp = XulySanPham.getSanpham(ct.MaSp);
+                        ct.MaSpNavigation = sp ?? new SanPham();
+                    }
+                    MySession.Set<DonDatHang>(HttpContext.Session, "tempDdh", ddh);
+                    return View(ddh);
+                }
+                NhanVien? nv = XulyNhanVien.getNhanvienByEmail(user);
+                if (nv != null)
+                {
+                    TempData["MessageError_NguoiDung"] = "Chưa hỗ trợ nhân viên đặt hàng!";
+                    return RedirectToAction("XemTaiKhoan", "TaiKhoan", new { email = nv.Email });
+                }
+            }
+            return RedirectToAction("DangNhap", "TaiKhoan");
+        }
+
+        public IActionResult ThanhToanCOD(string Tennd, string Sdt, string Diachi, string Phuongxa, string Tinhthanh)
+        {
+            DonDatHang? tempDdh = MySession.Get<DonDatHang>(HttpContext.Session, "tempDdh");
+            if (tempDdh == null || tempDdh.ChiTietDonDatHangs.Count == 0)
+            {
+                TempData["MessageError"] = "Đơn hàng chưa được tạo!";
+                return RedirectToAction("Index", "Home");
+            }
+            try
+            {
+                foreach (ChiTietDonDatHang ct in tempDdh.ChiTietDonDatHangs)
+                {
+                    SanPham? sp = XulySanPham.getSanpham(ct.MaSp);
+                    if (sp != null)
+                    {
+                        if (sp.Soluongton < ct.Soluong)
+                        {
+                            string tenSp = sp.Tensp ?? "Sản phẩm";
+                            TempData["MessageError_DonHang"] = "Số lượng của " + tenSp + " đã thay đổi do không còn đủ số lượng trong kho!";
+                            ct.Soluong = sp.Soluongton ?? 0;
+                            ct.Thanhtien = ct.Soluong * ct.Gia;
+                            MySession.Set<DonDatHang>(HttpContext.Session, "tempDdh", tempDdh);
+                            return RedirectToAction("Index");
+                        }
+                        sp.Soluongton -= ct.Soluong;
+                        if(XulySanPham.suaSanPham(sp.MaSp,sp) == false) return RedirectToAction("Index"); 
+                    }
+                }
+                DonDatHang ddh = new DonDatHang();
+                NguoiDung? nd = XulyNguoidung.getNguoidungByMand(tempDdh.MaNd);
+                if (nd == null)
+                {
+                    TempData["MessageError"] = "Người dùng không tồn tại!";
+                    return RedirectToAction("Index", "Home");
+                }
+                ddh.MaNd = nd.MaNd;
+                ddh.Phuongthuc = "COD";
+                ddh.Nguoinhan = Tennd ?? nd.Tennd;
+                ddh.Sdt = Sdt ?? nd.Sdt;
+                ddh.Tinhthanh = Tinhthanh ?? nd.Tinhthanh;
+                ddh.Phuongxa = Phuongxa ?? nd.Phuongxa;
+                ddh.Diachi = (Diachi ?? nd.Diachi) ?? "";
+                ddh.Ngaydat = DateTime.Now;
+                ddh.MaNdNavigation = nd;
+                ddh.ChiTietDonDatHangs = tempDdh.ChiTietDonDatHangs
+                     .Select(ct => new ChiTietDonDatHang
+                     {
+                         MaSp = ct.MaSp,
+                         Soluong = ct.Soluong,
+                         Gia = ct.Gia,
+                         Thanhtien = ct.Thanhtien
+                     }).ToList();
+                int tong = (int)(tempDdh.ChiTietDonDatHangs.Sum(t => t.Thanhtien) ?? 0);
+                int pt = HttpContext.Session.GetInt32("GG_PhanTram") ?? 0;
+                string loai = HttpContext.Session.GetString("GG_Loai") ?? "";
+
+                int tienGiam = loai.Equals("Voucher", StringComparison.OrdinalIgnoreCase) ? tong * pt / 100 : 0;
+
+                int phiShip = loai.Equals("Freeship", StringComparison.OrdinalIgnoreCase) ? 0 : 30000;
+
+
+                ddh.Tongtien = tong - tienGiam + phiShip;
+
+                ddh.Trangthai = "Đang xử lý";
+                ddh.TtThanhtoan = "Chưa thanh toán";
+                DonDatHangVM vm = DonDatHangVM.chuyenDoi(ddh);
+                XulyDonDatHang.themDonDatHang(vm);
+                List<ChiTietDonDatHangVM> dsCT = new List<ChiTietDonDatHangVM>();
+                foreach(ChiTietDonDatHang ct in ddh.ChiTietDonDatHangs)
+                {
+                    dsCT.Add(ChiTietDonDatHangVM.chuyenDoi(ct));
+                }
+                foreach (ChiTietDonDatHangVM x in dsCT)
+                {
+                    XulyChiTietDonDatHang.themCTDDH(x);
+                }
+                string maGg = HttpContext.Session.GetString("GG_Ma") ?? "";
+                if (!string.IsNullOrEmpty(maGg))
+                {
+                    List<ChiTietGiamGia> dsGG = XulyChiTietGiamGia.getDSChiTietGiamGia();
+                    var ct = dsGG
+                        .FirstOrDefault(x => x.MaGg == maGg && x.MaNd == tempDdh.MaNd);
+
+                    if (ct != null)
+                    {
+                        ct.Soluong -= 1;
+                        XulyChiTietGiamGia.suaChiTietGiamGia(ChiTietGiamGiaVM.chuyenDoi(ct));
+                    }
+                }
+                HttpContext.Session.Remove("tempDdh");
+                TempData["MessageSuccess_ThanhToan"] = "Thanh toán đơn hàng thành công!";
+                return RedirectToAction("lichSuDDH", "TaiKhoan", new { id = nd.MaNd });
+            }
+            catch (Exception)
+            {
+                TempData["MessageError_ThanhToan"] = "Thanh toán đơn hàng thất bại!";
+                return RedirectToAction("lichSuDDH", "TaiKhoan");
+            }
+        }
+
+        [HttpPost]
+        public IActionResult ThanhToanVNPay(string Tennd, string Sdt, string Diachi, string Phuongxa, string Tinhthanh)
+        {
+            HttpContext.Session.SetString("TenNguoiNhan", Tennd);
+            HttpContext.Session.SetString("SdtNguoiNhan", Sdt);
+            HttpContext.Session.SetString("DiaChiNguoiNhan", Diachi);
+            HttpContext.Session.SetString("TinhThanh", Tinhthanh);
+            HttpContext.Session.SetString("PhuongXa", Phuongxa);
+            // Lấy đơn hàng từ session
+            DonDatHang ddh = MySession.Get<DonDatHang>(HttpContext.Session, "tempDdh");
+            if (ddh == null || ddh.ChiTietDonDatHangs.Count == 0)
+            {
+                TempData["MessageError"] = "Đơn hàng chưa được tạo!";
+                return RedirectToAction("Index", "Home");
+            }
+
+            // Tính tổng tiền VNĐ theo VNPay (phải là long, *100)
+            //long totalAmount = (long)(ddh.ChiTietDonDatHangs.Sum(t => t.Thanhtien) * 100);
+            int tong = (int)(ddh.ChiTietDonDatHangs.Sum(t => t.Thanhtien) ?? 0);
+            int pt = HttpContext.Session.GetInt32("GG_PhanTram") ?? 0;
+            string loai = HttpContext.Session.GetString("GG_Loai") ?? "";
+
+
+            int tienGiam = loai.Equals("Voucher", StringComparison.OrdinalIgnoreCase) ? tong * pt / 100 : 0;
+
+            int phiShip = loai.Equals("Freeship", StringComparison.OrdinalIgnoreCase) ? 0 : 30000;
+
+            long totalAmount = (long)(tong - tienGiam + phiShip) * 100;
+
+            var vnpay = new VnPay();
+            var config = HttpContext.RequestServices.GetRequiredService<IConfiguration>();
+
+            var random = new Random();
+            string rd = random.Next(100000, 999999).ToString();
+            string txnRef = $"{ddh.MaNd}{rd}";
+
+            string ipAddress = HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "127.0.0.1";
+
+            // Thêm các thông số bắt buộc của VNPay
+            vnpay.AddRequestData("vnp_Version", config["VnPay:Version"]);            // "2.1.0"
+            vnpay.AddRequestData("vnp_Command", config["VnPay:Command"]);            // "pay"
+            vnpay.AddRequestData("vnp_TmnCode", config["VnPay:TmnCode"]);
+            vnpay.AddRequestData("vnp_Amount", totalAmount.ToString());              // bắt buộc long, không dấu
+            vnpay.AddRequestData("vnp_CreateDate", DateTime.Now.ToString("yyyyMMddHHmmss"));
+            vnpay.AddRequestData("vnp_CurrCode", "VND");
+            vnpay.AddRequestData("vnp_IpAddr", ipAddress);
+            vnpay.AddRequestData("vnp_Locale", "vn");
+            vnpay.AddRequestData("vnp_OrderInfo", $"ThanhToanDonHang_{ddh.MaNd}");
+            vnpay.AddRequestData("vnp_OrderType", "other");
+            vnpay.AddRequestData("vnp_ReturnUrl", config["VnPay:ReturnUrl"]);
+            vnpay.AddRequestData("vnp_TxnRef", txnRef);
+
+            // Tạo URL thanh toán VNPay
+            string paymentUrl = vnpay.CreateRequestUrl(config["VnPay:BaseUrl"], config["VnPay:HashSecret"]);
+
+            return Redirect(paymentUrl);
+        }
+
+        public IActionResult VNPayReturn()
+        {
+
+            var config = HttpContext.RequestServices.GetRequiredService<IConfiguration>();
+            string hashSecret = config["VnPay:HashSecret"];
+
+            VnPay vnpay = new VnPay();
+            string? ten = HttpContext.Session.GetString("TenNguoiNhan");
+            string? sdt = HttpContext.Session.GetString("SdtNguoiNhan");
+            string? diachi = HttpContext.Session.GetString("DiaChiNguoiNhan");
+            string? tinhthanh = HttpContext.Session.GetString("TinhThanh");
+            string? phuongxa = HttpContext.Session.GetString("PhuongXa");
+
+            // Lấy query string VNPay trả về
+            foreach (var key in Request.Query.Keys)
+            {
+                if (!string.IsNullOrEmpty(key) && key.StartsWith("vnp_"))
+                {
+                    vnpay.AddResponseData(key, Request.Query[key]);
+                }
+            }
+
+            string vnp_SecureHash = Request.Query["vnp_SecureHash"];
+            bool checkSignature = vnpay.ValidateSignature(vnp_SecureHash, hashSecret);
+
+            if (!checkSignature)
+            {
+                TempData["MessageError"] = "Chữ ký VNPay không hợp lệ!";
+                return RedirectToAction("Index", "Home");
+            }
+
+            string responseCode = Request.Query["vnp_ResponseCode"];
+            DonDatHang tempDdh = MySession.Get<DonDatHang>(HttpContext.Session, "tempDdh");
+            int tong = (int)(tempDdh.ChiTietDonDatHangs.Sum(t => t.Thanhtien) ?? 0);
+            int pt = HttpContext.Session.GetInt32("GG_PhanTram") ?? 0;
+            string loai = HttpContext.Session.GetString("GG_Loai") ?? "";
+
+            int tienGiam = loai.Equals("Voucher", StringComparison.OrdinalIgnoreCase) ? tong * pt / 100 : 0;
+
+            int phiShip = loai.Equals("Freeship", StringComparison.OrdinalIgnoreCase) ? 0 : 30000;
+
+            if (responseCode == "00" && tempDdh != null)
+            {
+                NguoiDung? nd = XulyNguoidung.getNguoidungByMand(tempDdh.MaNd);
+                if (nd != null)
+                {
+                    foreach (ChiTietDonDatHang ct in tempDdh.ChiTietDonDatHangs)
+                    {
+                        SanPham? sp = XulySanPham.getSanpham(ct.MaSp);
+                        if (sp != null)
+                        {
+                            sp.Soluongton -= ct.Soluong;
+                            XulySanPham.suaSanPham(ct.MaSp, sp);
+                        }
+                    }
+
+                    DonDatHang ddh = new DonDatHang
+                    {
+                        MaNd = nd.MaNd,
+                        MaNv = XulyNhanVien.getDSNhanvien().FirstOrDefault()?.MaNv,
+                        Ngaydat = DateTime.Now,
+                        Phuongthuc = "VNPay",
+                        Nguoinhan = ten ?? nd.Tennd,
+                        Sdt = sdt ?? nd.Sdt,
+                        Tinhthanh = tinhthanh ?? nd.Tinhthanh,
+                        Phuongxa = phuongxa ?? nd.Phuongxa,
+                        Diachi = (diachi ?? nd.Diachi) ?? "",
+                        Trangthai = "Đang xử lý",
+                        TtThanhtoan = "Đã thanh toán",
+                        ChiTietDonDatHangs = tempDdh.ChiTietDonDatHangs.Select(ct => new ChiTietDonDatHang
+                        {
+                            MaSp = ct.MaSp,
+                            Soluong = ct.Soluong,
+                            Gia = ct.Gia,
+                            Thanhtien = ct.Thanhtien
+                        }).ToList(),
+                        Tongtien = tempDdh.ChiTietDonDatHangs.Sum(t => t.Thanhtien)
+                    };
+                    XulyDonDatHang.themDonDatHang(DonDatHangVM.chuyenDoi(ddh));
+                    List<ChiTietDonDatHangVM> dsCT = new List<ChiTietDonDatHangVM>();
+                    foreach (ChiTietDonDatHang ct in ddh.ChiTietDonDatHangs)
+                    {
+                        dsCT.Add(ChiTietDonDatHangVM.chuyenDoi(ct));
+                    }
+                    foreach (ChiTietDonDatHangVM x in dsCT)
+                    {
+                        XulyChiTietDonDatHang.themCTDDH(x);
+                    }
+                    string maGg = HttpContext.Session.GetString("GG_Ma") ?? "";
+                    if (!string.IsNullOrEmpty(maGg))
+                    {
+                        List<ChiTietGiamGia> dsGG = XulyChiTietGiamGia.getDSChiTietGiamGia();
+                        var ct = dsGG
+                            .FirstOrDefault(x => x.MaGg == maGg && x.MaNd == tempDdh.MaNd);
+
+                        if (ct != null)
+                        {
+                            ct.Soluong -= 1;
+                            XulyChiTietGiamGia.suaChiTietGiamGia(ChiTietGiamGiaVM.chuyenDoi(ct));
+                        }
+                    }
+                    HttpContext.Session.Remove("tempDdh");
+                    TempData["MessageSuccess_ThanhToan"] = "Thanh toán VNPay thành công!";
+                }
+            }
+            else
+            {
+                TempData["MessageError_ThanhToan"] = "Thanh toán thất bại hoặc bị hủy!";
+            }
+
+            return RedirectToAction("lichSuDDH", "TaiKhoan");
+        }
+
+        public IActionResult huyDDH(string id)
+        {
+            DonDatHang? ddh = XulyDonDatHang.getDondathang(Int32.Parse(id));
+            if (ddh != null && ddh.Trangthai == "Đang xử lý" && ddh.TtThanhtoan == "Chưa thanh toán")
+            {
+                ddh.Trangthai = "Đã hủy";
+                List<ChiTietDonDatHang> dsCT = XulyChiTietDonDatHang.getDSChitietdondathangByMaddh(ddh.MaDdh);
+                foreach (ChiTietDonDatHang ct in dsCT)
+                {
+                    SanPham? sp = XulySanPham.getSanpham(ct.MaSp);
+                    if (sp != null)
+                    {
+                        sp.Soluongton += ct.Soluong;
+                        XulySanPham.suaSanPham(sp.MaSp,sp);
+                    }
+                }
+                XulyDonDatHang.suaDonDatHang(ddh.MaDdh,DonDatHangVM.chuyenDoi(ddh));
+                return RedirectToAction("lichSuDDH", "TaiKhoan", new { id = ddh.MaNd });
+            }
+            return RedirectToAction("Index");
+        }
+
+        public IActionResult xemDDH(int id)
+        {
+            DonDatHang? ddh = XulyDonDatHang.getDondathang(id);
+            if (ddh != null)
+            {
+                ddh.ChiTietDonDatHangs = new List<ChiTietDonDatHang>();
+                ddh.ChiTietDonDatHangs = XulyChiTietDonDatHang.getDSChitietdondathangByMaddh(ddh.MaDdh);
+                foreach (ChiTietDonDatHang ct in ddh.ChiTietDonDatHangs)
+                {
+                    SanPham? sp = XulySanPham.getSanpham(ct.MaSp);
+                    ct.MaSpNavigation = sp ?? new SanPham();
+                }
+                ddh.MaNdNavigation = XulyNguoidung.getNguoidungByMand(ddh.MaNd) ?? new NguoiDung();
+                ddh.MaNvNavigation = XulyNhanVien.getNhanvienByManv(ddh.MaNv);
+            }
+            ViewBag.DsHinh = XulyHinh.getDSHinh();
+            return View(ddh);
+        }
+
+        public IActionResult ApDungMa(string maGg)
+        {
+            string email = HttpContext.Session.GetString("USER_EMAIL") ?? "";
+            if (string.IsNullOrEmpty(email))
+                return RedirectToAction("DangNhap", "TaiKhoan");
+
+            NguoiDung? nd = XulyNguoidung.getNguoidungByEmail(email);
+            if (nd == null)
+                return RedirectToAction("DangNhap", "TaiKhoan");
+
+            List<ChiTietGiamGia> ctgg = XulyChiTietGiamGia.getChiTietGiamGiaByNguoiDung(nd.MaNd);
+
+            ChiTietGiamGia? ct = ctgg
+                .Where(x => x.MaGg == maGg)
+                .FirstOrDefault();
+            GiamGia gg = XulyGiamGia.getGiamGia(ct.MaGg);
+
+            HttpContext.Session.Remove("GG_Ma");
+            HttpContext.Session.Remove("GG_Loai");
+            HttpContext.Session.Remove("GG_PhanTram");
+
+            if (gg != null)
+            {
+                DonDatHang tempDdh = MySession.Get<DonDatHang>(HttpContext.Session, "tempDdh");
+                if (tempDdh != null && tempDdh.Tongtien >= gg.Dieukien)
+                {
+                    HttpContext.Session.SetString("GG_Ma", gg.MaGg);
+                    HttpContext.Session.SetString("GG_Loai", gg.Loaima ?? "");
+                    HttpContext.Session.SetInt32("GG_PhanTram", gg.Phantramgiam ?? 0);
+                    TempData["MessageSuccess_MaGiamGia"] = "Chúc mừng, mã giảm giá đã được áp dụng!";
+                }
+                else
+                {
+                    TempData["MessageError_MaGiamGia"] = "Điều kiện đơn hàng chưa đạt!";
+                }
+            }
+
+            return RedirectToAction("thanhToan", new { user = email });
+        }
+
+
+    }
+}

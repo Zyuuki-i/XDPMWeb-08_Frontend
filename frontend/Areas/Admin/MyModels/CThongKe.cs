@@ -1,0 +1,14 @@
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace frontend.Areas.Admin.MyModels
+{
+    public class CThongKes
+    {
+        [Display(Name = "Tháng")]
+        public int Thang { get; set; }
+        [Display(Name = "Số lượng đơn")]
+        public int SoLuongDon { get; set; }
+        [Display(Name = "Tổng tiền")]
+        public decimal TongTien { get; set; }
+    }
+}

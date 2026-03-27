@@ -1,4 +1,6 @@
-﻿namespace frontend.Models
+﻿using frontend.Areas.Admin.MyModels;
+
+namespace frontend.Models
 {
     public class XulySanPham
     {
@@ -60,5 +62,51 @@
             }
         }
 
+        public static bool themSanPham(SanPham sp)
+        {
+            try
+            {
+                var kq = hc.PostAsJsonAsync(apiUrl, sp);
+                kq.Wait();
+
+                return kq.Result.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public static bool suaSanPham(string id, SanPham sp)
+        {
+            try
+            {
+                var kq = hc.PutAsJsonAsync(apiUrl + "/" + id, sp);
+                kq.Wait();
+
+                return kq.Result.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public static bool xoaSanPham(string id)
+        {
+            try
+            {
+                var kq = hc.DeleteAsync(apiUrl + "/" + id);
+                kq.Wait();
+
+                return kq.Result.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        //end
     }
 }

@@ -28,6 +28,46 @@ app.UseRouting();
 
 app.UseSession();
 
+app.Use(async (context, next) =>
+{
+    var path = context.Request.Path.ToString().ToLower();
+
+    if (path.StartsWith("/admin"))
+    {
+        var role = context.Session.GetString("UserRole");
+
+        if (string.IsNullOrEmpty(role) || role != "Admin" && role != "Staff")
+        {
+            context.Response.Redirect("/TaiKhoan/DangNhap");
+            return;
+        }
+    }
+
+    if (path.StartsWith("/carrier"))
+    {
+        var role = context.Session.GetString("UserRole");
+
+        if (string.IsNullOrEmpty(role) || role != "Carrier")
+        {
+            context.Response.Redirect("/TaiKhoan/DangNhap");
+            return;
+        }
+    }
+
+    if (path.StartsWith("/admin/thongke") || path.StartsWith("/admin/nhanvien"))
+    {
+        var role = context.Session.GetString("UserRole");
+
+        if (string.IsNullOrEmpty(role) || role != "Admin")
+        {
+            context.Response.Redirect("/TaiKhoan/DangNhap");
+            return;
+        }
+    }
+
+    await next();
+});
+
 app.UseAuthorization();
 
 app.MapControllerRoute(

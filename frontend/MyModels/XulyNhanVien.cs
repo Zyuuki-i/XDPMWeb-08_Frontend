@@ -2,50 +2,34 @@
 
 namespace frontend.MyModels
 {
-    public class XulyNguoidung
+    public class XulyNhanVien
     {
-        private static string apiUrl = "http://musicstore08.somee.com/api/nguoidung";
-        //private static string apiUrl = "https://localhost:7073/api/NguoiDung";
+        private static string apiUrl = "http://musicstore08.somee.com/api/nhanvien";
+        //private static string apiUrl = "https://localhost:7073/api/NhanVien";
 
         private static readonly HttpClient hc = new HttpClient();
-        public static List<NguoiDung> getDSNguoidung()
+        public static List<NhanVien> getDSNhanvien()
         {
             try
             {
-                var kq = hc.GetFromJsonAsync<List<NguoiDung>>(apiUrl);
+                var kq = hc.GetFromJsonAsync<List<NhanVien>>(apiUrl);
                 kq.Wait();
                 if (kq.IsCompletedSuccessfully == false)
-                    return new List<NguoiDung>();
+                    return new List<NhanVien>();
                 return kq.Result;
             }
             catch (Exception)
             {
-                return new List<NguoiDung>();
+                return new List<NhanVien>();
             }
 
         }
 
-        public static NguoiDung getNguoidungByMand(int mand)
+        public static NhanVien getNhanvienByManv(string manv)
         {
             try
             {
-                var kq = hc.GetFromJsonAsync<NguoiDung>(apiUrl + @"/DanhGia/" + mand);
-                kq.Wait();
-                if (kq.IsCompletedSuccessfully == false)
-                    return null;
-                return kq.Result;
-            }
-            catch (Exception)
-            {
-                return null;
-            }
-        }
-
-        public static NguoiDung DangNhap(string email, string password)
-        {
-            try
-            {
-                var kq = hc.GetFromJsonAsync<NguoiDung>(apiUrl + @"/DangNhap?email="+email+"&password="+password);
+                var kq = hc.GetFromJsonAsync<NhanVien>(apiUrl + @"/" + manv);
                 kq.Wait();
                 if (kq.IsCompletedSuccessfully == false)
                     return null;
@@ -57,11 +41,11 @@ namespace frontend.MyModels
             }
         }
 
-        public static NguoiDung getNguoidungByEmail(string email)
+        public static NhanVien DangNhap(string email, string password)
         {
             try
             {
-                var kq = hc.GetFromJsonAsync<NguoiDung>(apiUrl + @"/Email?email=" + email);
+                var kq = hc.GetFromJsonAsync<NhanVien>(apiUrl + @"/DangNhap?email=" + email + "&password=" + password);
                 kq.Wait();
                 if (kq.IsCompletedSuccessfully == false)
                     return null;
@@ -71,13 +55,31 @@ namespace frontend.MyModels
             {
                 return null;
             }
+
         }
 
-        public static bool themNguoidung(NguoiDung nd)
+        public static NhanVien getNhanvienByEmail(string email)
         {
             try
             {
-                var kq = hc.PostAsJsonAsync(apiUrl, nd);
+                var kq = hc.GetFromJsonAsync<NhanVien>(apiUrl + @"/Email?email=" + email);
+                kq.Wait();
+                if (kq.IsCompletedSuccessfully == false)
+                    return null;
+                return kq.Result;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+
+        }
+
+        public static bool themNhanvien(NhanVien nv)
+        {
+            try
+            {
+                var kq = hc.PostAsJsonAsync(apiUrl, nv);
                 kq.Wait();
 
                 return kq.IsCompletedSuccessfully && kq.Result.IsSuccessStatusCode;
@@ -88,11 +90,11 @@ namespace frontend.MyModels
             }
         }
 
-        public static bool suaNguoidung(int id, NguoiDung nd)
+        public static bool suaNhanvien(string id, NhanVien nv)
         {
             try
             {
-                var kq = hc.PutAsJsonAsync(apiUrl + "/" + id, nd);
+                var kq = hc.PutAsJsonAsync(apiUrl + "/" + id, nv);
                 kq.Wait();
 
                 return kq.IsCompletedSuccessfully && kq.Result.IsSuccessStatusCode;
@@ -103,7 +105,7 @@ namespace frontend.MyModels
             }
         }
 
-        public static bool xoaNguoidung(int id)
+        public static bool xoaNhanvien(string id)
         {
             try
             {
@@ -117,8 +119,5 @@ namespace frontend.MyModels
                 return false;
             }
         }
-
-
-        //end
     }
 }

@@ -59,5 +59,20 @@ namespace frontend.MyModels
             }
         }
 
+        public static bool themDanhgia(DanhGia dg)
+        {
+            try
+            {
+                var kq = hc.PostAsJsonAsync(apiUrl, dg);
+                kq.Wait();
+
+                return kq.IsCompletedSuccessfully && kq.Result.IsSuccessStatusCode;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
     }
 }
