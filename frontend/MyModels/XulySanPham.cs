@@ -32,12 +32,12 @@ namespace frontend.Models
                 var kq = hc.GetFromJsonAsync<SanPham>(apiUrl+@"/"+masp);
                 kq.Wait();
                 if (kq.IsCompletedSuccessfully == false)
-                    return new SanPham();
+                    return null;
                 return kq.Result;
             }
             catch (Exception)
             {
-                return new SanPham();
+                return null;
             }
         }
 

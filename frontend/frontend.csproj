@@ -16,7 +16,6 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\images\anhsp\SP07\" />
-    <Folder Include="wwwroot\images\anhsp\SP0\" />
   </ItemGroup>
 
 </Project>

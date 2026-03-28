@@ -41,7 +41,23 @@ namespace frontend.MyModels
             }
         }
 
-        public static bool themDonDatHang(DonDatHangVM dto)
+        public static List<DonDatHang> getDondathangByTT(string trangthai)
+        {
+            try
+            {
+                var kq = hc.GetFromJsonAsync<List<DonDatHang>>(apiUrl + @"/TrangThai?trangthai=" + trangthai);
+                kq.Wait();
+                if (kq.IsCompletedSuccessfully == false)
+                    return new List<DonDatHang>();
+                return kq.Result;
+            }
+            catch (Exception)
+            {
+                return new List<DonDatHang>();
+            }
+        }
+
+        public static bool themDonDatHang(DonDatHangDTO dto)
         {
             try
             {
@@ -55,7 +71,7 @@ namespace frontend.MyModels
                 return false;
             }
         }
-        public static bool suaDonDatHang(int id, DonDatHangVM ddh)
+        public static bool suaDonDatHang(int id, DonDatHangDTO ddh)
         {
             try
             {

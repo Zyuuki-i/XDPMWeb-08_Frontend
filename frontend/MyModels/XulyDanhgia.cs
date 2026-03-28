@@ -59,16 +59,46 @@ namespace frontend.MyModels
             }
         }
 
-        public static bool themDanhgia(DanhGia dg)
+        public static bool them(DanhGia x)
         {
             try
             {
-                var kq = hc.PostAsJsonAsync(apiUrl, dg);
+                var kq = hc.PostAsJsonAsync(apiUrl, x);
                 kq.Wait();
 
-                return kq.IsCompletedSuccessfully && kq.Result.IsSuccessStatusCode;
+                return kq.Result.IsSuccessStatusCode;
             }
-            catch (Exception)
+            catch
+            {
+                return false;
+            }
+        }
+
+        public static bool sua(int id, DanhGia x)
+        {
+            try
+            {
+                var kq = hc.PutAsJsonAsync(apiUrl + "/" + id, x);
+                kq.Wait();
+
+                return kq.Result.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public static bool xoa(int id)
+        {
+            try
+            {
+                var kq = hc.DeleteAsync(apiUrl + "/" + id);
+                kq.Wait();
+
+                return kq.Result.IsSuccessStatusCode;
+            }
+            catch
             {
                 return false;
             }

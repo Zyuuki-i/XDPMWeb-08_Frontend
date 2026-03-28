@@ -238,8 +238,12 @@ namespace frontend.Controllers
                     }
                     ddh.MaNd = nd.MaNd;
                     ddh.Tongtien = ddh.ChiTietDonDatHangs.Sum(t => t.Thanhtien);
-                    var dsGiamGia = XulyChiTietGiamGia.getChiTietGiamGiaByNguoiDung(nd.MaNd);
-
+                    List<ChiTietGiamGia> dsCTGG = XulyChiTietGiamGia.getChiTietGiamGiaByNguoiDung(nd.MaNd);
+                    List<GiamGia> dsGiamGia = new List<GiamGia>();
+                    foreach(ChiTietGiamGia ct in  dsCTGG)
+                    {
+                        dsGiamGia.Add(XulyGiamGia.getGiamGia(ct.MaGg));
+                    }
                     ViewBag.DsGiamGia = dsGiamGia;
                     ddh.MaNdNavigation = nd;
                     foreach (ChiTietDonDatHang ct in ddh.ChiTietDonDatHangs)
@@ -325,14 +329,14 @@ namespace frontend.Controllers
 
                 ddh.Trangthai = "Đang xử lý";
                 ddh.TtThanhtoan = "Chưa thanh toán";
-                DonDatHangVM vm = DonDatHangVM.chuyenDoi(ddh);
+                DonDatHangDTO vm = DonDatHangDTO.chuyenDoi(ddh);
                 XulyDonDatHang.themDonDatHang(vm);
-                List<ChiTietDonDatHangVM> dsCT = new List<ChiTietDonDatHangVM>();
+                List<ChiTietDonDatHangDTO> dsCT = new List<ChiTietDonDatHangDTO>();
                 foreach(ChiTietDonDatHang ct in ddh.ChiTietDonDatHangs)
                 {
-                    dsCT.Add(ChiTietDonDatHangVM.chuyenDoi(ct));
+                    dsCT.Add(ChiTietDonDatHangDTO.chuyenDoi(ct));
                 }
-                foreach (ChiTietDonDatHangVM x in dsCT)
+                foreach (ChiTietDonDatHangDTO x in dsCT)
                 {
                     XulyChiTietDonDatHang.themCTDDH(x);
                 }
@@ -346,7 +350,7 @@ namespace frontend.Controllers
                     if (ct != null)
                     {
                         ct.Soluong -= 1;
-                        XulyChiTietGiamGia.suaChiTietGiamGia(ChiTietGiamGiaVM.chuyenDoi(ct));
+                        XulyChiTietGiamGia.suaChiTietGiamGia(ChiTietGiamGiaDTO.chuyenDoi(ct));
                     }
                 }
                 HttpContext.Session.Remove("tempDdh");
@@ -496,13 +500,13 @@ namespace frontend.Controllers
                         }).ToList(),
                         Tongtien = tempDdh.ChiTietDonDatHangs.Sum(t => t.Thanhtien)
                     };
-                    XulyDonDatHang.themDonDatHang(DonDatHangVM.chuyenDoi(ddh));
-                    List<ChiTietDonDatHangVM> dsCT = new List<ChiTietDonDatHangVM>();
+                    XulyDonDatHang.themDonDatHang(DonDatHangDTO.chuyenDoi(ddh));
+                    List<ChiTietDonDatHangDTO> dsCT = new List<ChiTietDonDatHangDTO>();
                     foreach (ChiTietDonDatHang ct in ddh.ChiTietDonDatHangs)
                     {
-                        dsCT.Add(ChiTietDonDatHangVM.chuyenDoi(ct));
+                        dsCT.Add(ChiTietDonDatHangDTO.chuyenDoi(ct));
                     }
-                    foreach (ChiTietDonDatHangVM x in dsCT)
+                    foreach (ChiTietDonDatHangDTO x in dsCT)
                     {
                         XulyChiTietDonDatHang.themCTDDH(x);
                     }
@@ -516,7 +520,7 @@ namespace frontend.Controllers
                         if (ct != null)
                         {
                             ct.Soluong -= 1;
-                            XulyChiTietGiamGia.suaChiTietGiamGia(ChiTietGiamGiaVM.chuyenDoi(ct));
+                            XulyChiTietGiamGia.suaChiTietGiamGia(ChiTietGiamGiaDTO.chuyenDoi(ct));
                         }
                     }
                     HttpContext.Session.Remove("tempDdh");
@@ -547,7 +551,7 @@ namespace frontend.Controllers
                         XulySanPham.suaSanPham(sp.MaSp,sp);
                     }
                 }
-                XulyDonDatHang.suaDonDatHang(ddh.MaDdh,DonDatHangVM.chuyenDoi(ddh));
+                XulyDonDatHang.suaDonDatHang(ddh.MaDdh,DonDatHangDTO.chuyenDoi(ddh));
                 return RedirectToAction("lichSuDDH", "TaiKhoan", new { id = ddh.MaNd });
             }
             return RedirectToAction("Index");
@@ -582,18 +586,13 @@ namespace frontend.Controllers
             if (nd == null)
                 return RedirectToAction("DangNhap", "TaiKhoan");
 
-            List<ChiTietGiamGia> ctgg = XulyChiTietGiamGia.getChiTietGiamGiaByNguoiDung(nd.MaNd);
-
-            ChiTietGiamGia? ct = ctgg
-                .Where(x => x.MaGg == maGg)
-                .FirstOrDefault();
-            GiamGia gg = XulyGiamGia.getGiamGia(ct.MaGg);
+            GiamGia gg = XulyGiamGia.getGiamGia(maGg);
 
             HttpContext.Session.Remove("GG_Ma");
             HttpContext.Session.Remove("GG_Loai");
             HttpContext.Session.Remove("GG_PhanTram");
 
-            if (gg != null)
+            if (gg != null && gg.Ngaybd <= DateTime.Now && gg.Ngaykt >= DateTime.Now)
             {
                 DonDatHang tempDdh = MySession.Get<DonDatHang>(HttpContext.Session, "tempDdh");
                 if (tempDdh != null && tempDdh.Tongtien >= gg.Dieukien)
@@ -608,7 +607,10 @@ namespace frontend.Controllers
                     TempData["MessageError_MaGiamGia"] = "Điều kiện đơn hàng chưa đạt!";
                 }
             }
-
+            else
+            {
+                TempData["MessageError_MaGiamGia"] = "Có lỗi khi dùng mã!";
+            }
             return RedirectToAction("thanhToan", new { user = email });
         }
 

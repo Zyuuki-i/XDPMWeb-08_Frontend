@@ -25,6 +25,38 @@ namespace frontend.MyModels
 
         }
 
+        public static List<NhanVien> getDSNhanvienByTT(bool tt)
+        {
+            try
+            {
+                var kq = hc.GetFromJsonAsync<List<NhanVien>>(apiUrl + @"/TrangThai?trangthai=" + tt);
+                kq.Wait();
+                if (kq.IsCompletedSuccessfully == false)
+                    return new List<NhanVien>();
+                return kq.Result;
+            }
+            catch (Exception)
+            {
+                return new List<NhanVien>();
+            }
+        }
+
+        public static List<NhanVien> getDSNhanvienByVT(string vt)
+        {
+            try
+            {
+                var kq = hc.GetFromJsonAsync<List<NhanVien>>(apiUrl + @"/VaiTro?vaitro=" + vt);
+                kq.Wait();
+                if (kq.IsCompletedSuccessfully == false)
+                    return new List<NhanVien>();
+                return kq.Result;
+            }
+            catch (Exception)
+            {
+                return new List<NhanVien>();
+            }
+        }
+
         public static NhanVien getNhanvienByManv(string manv)
         {
             try
@@ -75,46 +107,63 @@ namespace frontend.MyModels
 
         }
 
-        public static bool themNhanvien(NhanVien nv)
+        public static NhanVien getNhanvienByCCCD(string cccd)
         {
             try
             {
-                var kq = hc.PostAsJsonAsync(apiUrl, nv);
+                var kq = hc.GetFromJsonAsync<NhanVien>(apiUrl + @"/CCCD?cccd=" + cccd);
                 kq.Wait();
-
-                return kq.IsCompletedSuccessfully && kq.Result.IsSuccessStatusCode;
+                if (kq.IsCompletedSuccessfully == false)
+                    return null;
+                return kq.Result;
             }
             catch (Exception)
+            {
+                return null;
+            }
+
+        }
+
+        public static bool them(NhanVien x)
+        {
+            try
+            {
+                var kq = hc.PostAsJsonAsync(apiUrl, x);
+                kq.Wait();
+
+                return kq.Result.IsSuccessStatusCode;
+            }
+            catch
             {
                 return false;
             }
         }
 
-        public static bool suaNhanvien(string id, NhanVien nv)
+        public static bool sua(string id, NhanVien x)
         {
             try
             {
-                var kq = hc.PutAsJsonAsync(apiUrl + "/" + id, nv);
+                var kq = hc.PutAsJsonAsync(apiUrl + "/" + id, x);
                 kq.Wait();
 
-                return kq.IsCompletedSuccessfully && kq.Result.IsSuccessStatusCode;
+                return kq.Result.IsSuccessStatusCode;
             }
-            catch (Exception)
+            catch
             {
                 return false;
             }
         }
 
-        public static bool xoaNhanvien(string id)
+        public static bool xoa(string id)
         {
             try
             {
                 var kq = hc.DeleteAsync(apiUrl + "/" + id);
                 kq.Wait();
 
-                return kq.IsCompletedSuccessfully && kq.Result.IsSuccessStatusCode;
+                return kq.Result.IsSuccessStatusCode;
             }
-            catch (Exception)
+            catch
             {
                 return false;
             }

@@ -28,8 +28,8 @@ namespace frontend.Areas.Admin.MyModels
         [Display(Name = "Mô tả")]
         public string? Mota { get; set; }
 
-        public string Tenloai { get; set; } = null!;
-        public string Tennsx { get; set; } = null!;
+        public virtual LoaiSanPham? MaLoaiNavigation { get; set; }
+        public virtual NhaSanXuat? MaNsxNavigation { get; set; }
 
         public static CSanPham chuyenDoi(SanPham sp)
         {
@@ -43,8 +43,8 @@ namespace frontend.Areas.Admin.MyModels
                 Giasp = sp.Giasp,
                 Soluongton = sp.Soluongton,
                 Mota = sp.Mota,
-                Tenloai = sp.Tenloai,
-                Tennsx = sp.Tennsx,
+                MaLoaiNavigation = null,
+                MaNsxNavigation = null,
             };
         }
 
@@ -60,8 +60,8 @@ namespace frontend.Areas.Admin.MyModels
                 Giasp = sp.Giasp,
                 Soluongton = sp.Soluongton,
                 Mota = sp.Mota,
-                Tenloai = sp.Tenloai,
-                Tennsx = sp.Tennsx
+                Tenloai = sp.MaLoaiNavigation?.Tenloai ?? "",
+                Tennsx = sp.MaNsxNavigation?.Tennsx ?? "",
             };
         }
     }

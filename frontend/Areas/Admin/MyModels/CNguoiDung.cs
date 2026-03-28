@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using frontend.Models;
 
-namespace WebApp_BanNhacCu.Areas.Admin.MyModels
+namespace frontend.Areas.Admin.MyModels
 {
     public class CNguoiDung
     {

@@ -1,0 +1,171 @@
+﻿@model IEnumerable<frontend.Areas.Admin.MyModels.CSanPham>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h1 class="m-3 text-center">Quản Lý Sản Phẩm</h1>
+
+<p class="text-center">
+    <a class="btn btn-outline-success me-3" asp-action="formThemSP">Thêm Sản Phẩm</a>
+</p>
+<div class="row">
+    <div class="row col-sm-8">
+        <form class="d-flex" method="get" asp-controller="SanPham" asp-action="locSanPham">
+            <div class="col-sm-3 ms-1" >
+                <select name="MaLoai" asp-items="ViewBag.DsLoai" class="form-select" onchange="this.form.submit()">
+                    <option value="all">All</option>
+                </select>
+            </div>
+            <div class="col-sm-3 ms-1" >
+                <select name="MaNsx" asp-items="ViewBag.DsNsx" class="form-select" onchange="this.form.submit()">
+                    <option value="all">All</option>
+                </select>
+            </div>
+            <div class="col-sm-6 ms-1">
+                
+            </div>
+        </form>
+    </div> 
+    <div class="col-sm-4 d-flex flex-row justify-content-end">
+        <div class="border border-secondary rounded-2" style="width:250px">
+            <form class="d-flex" method="post" asp-action="timKiem">
+                <input class="form-control border-0 " type="search" name="MaSp" placeholder="Tìm kiếm sản phẩm.." required>
+                <button type="submit" class="btn rounded-2"><i class="bi bi-search"></i></button>
+            </form>
+        </div>
+    </div>
+</div>
+@if (!Model.Any())
+{
+    <div style="height: 600px;">
+        <div class="d-flex w-100 h-100 align-items-center justify-content-center">
+            <h4 class="text-danger">Không tìm thấy sản phẩm phù hợp!</h4>
+            <a asp-controller="SanPham" asp-action="index" class="btn btn-primary ms-3">Quay lại</a>
+        </div>
+    </div>
+}
+else
+{
+<table class="table table-bordered mt-2">
+    <thead class="text-center">
+        <tr>
+            <th>
+                Ảnh
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.MaSp)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Tensp)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.MaNsx)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.MaLoai)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Giasp)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Mota)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr class="@if(ViewBag.FindMaSp == item.MaSp){ @("bg-info") }">
+            <td>
+                @{
+                    string tenfile = "";
+                    List<Hinh> dsHinh = ViewBag.DsHinh;
+                    @foreach (Hinh hinh in dsHinh)
+                    {
+                        if(hinh.MaSp == item.MaSp){
+                            tenfile = hinh.Tenhinh??"";
+                            break;
+                        }
+                    }
+                    string url = "";
+                    if(tenfile == "")
+                    {
+                        url = "~/images/anhsp/default.png";
+                    }
+                    else
+                    {
+                        url = "~/images/anhsp/" + item.MaSp.Trim() + "/" + tenfile;
+                    }
+                }
+                <img src="@Url.Content(url)" alt="Hình Sản Phẩm" width="100" height="100" />
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MaSp)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Tensp)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MaNsx)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MaLoai)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Giasp)
+            </td>
+            <td>
+                @Html.TextAreaFor(modelItem => item.Mota, new { @class = "form-control" })
+            </td>
+            <td class="d-flex justify-content-around">
+                <a class="btn btn-outline-danger" asp-route-id="@item.MaSp.Trim()" asp-action="formXoaSP">Xóa</a>
+                <a class="btn btn-outline-primary" asp-route-id="@item.MaSp.Trim()" asp-action="formSuaSP">Sửa</a>
+                <a class="btn btn-outline-primary" asp-route-id="@item.MaSp.Trim()" asp-action="chiTietSP">Chi tiết</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+}
+@if (ViewBag.tongTrang != null && ViewBag.tongTrang > 1)
+{
+    string? masp = TempData["masp"] as string;
+    string? maloai = TempData["maloai"] as string;
+    string? mansx = TempData["mansx"] as string;
+    if (string.IsNullOrEmpty(masp))
+    {
+        masp = "";
+    }
+    if (string.IsNullOrEmpty(maloai))
+    {
+        maloai = "";
+    }
+    if (string.IsNullOrEmpty(mansx))
+    {
+        mansx = "";
+    }
+
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center align-items-center">
+            <li><a class="text-secondary me-2" href="@Url.Action("Index", new { MaLoai = maloai, MaNsx = mansx, MaSp = masp })"><i class="bi bi-chevron-double-left"></i></a></li>
+            @for (int i = 1; i <= ViewBag.tongTrang; i++)
+            {
+                if (i == ViewBag.trangHienTai)
+                {
+                    <li class="page-item active">
+                        <a class="page-link" href="@Url.Action("Index", new { MaLoai = maloai, MaNsx = mansx, MaSp = masp, trang = i })">@i</a>
+                    </li>
+                }
+                else
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("Index", new { MaLoai = maloai, MaNsx = mansx, MaSp = masp, trang = i })">@i</a>
+                    </li>
+                }
+            }
+            <li><a class="text-secondary ms-2" href="@Url.Action("Index", new { MaLoai = maloai, MaNsx = mansx, MaSp = masp, trang = ViewBag.tongTrang })"><i class="bi bi-chevron-double-right"></i></a></li>
+        </ul>
+    </nav>
+}

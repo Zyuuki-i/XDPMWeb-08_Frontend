@@ -9,8 +9,5 @@ namespace frontend.Models
         public string MaNv { get; set; } = null!;
         public string MaSp { get; set; } = null!;
         public DateTime? Ngaycapnhat { get; set; }
-
-        public virtual NhanVien MaNvNavigation { get; set; } = null!;
-        public virtual SanPham MaSpNavigation { get; set; } = null!;
     }
 }

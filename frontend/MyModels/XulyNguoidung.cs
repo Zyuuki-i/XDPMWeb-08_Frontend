@@ -22,7 +22,22 @@ namespace frontend.MyModels
             {
                 return new List<NguoiDung>();
             }
+        }
 
+        public static List<NguoiDung> getDSNguoidungByTT(bool tt)
+        {
+            try
+            {
+                var kq = hc.GetFromJsonAsync<List<NguoiDung>>(apiUrl + @"/TrangThai?trangthai=" + tt);
+                kq.Wait();
+                if (kq.IsCompletedSuccessfully == false)
+                    return new List<NguoiDung>();
+                return kq.Result;
+            }
+            catch (Exception)
+            {
+                return new List<NguoiDung>();
+            }
         }
 
         public static NguoiDung getNguoidungByMand(int mand)
@@ -73,46 +88,46 @@ namespace frontend.MyModels
             }
         }
 
-        public static bool themNguoidung(NguoiDung nd)
+        public static bool them(NguoiDung x)
         {
             try
             {
-                var kq = hc.PostAsJsonAsync(apiUrl, nd);
+                var kq = hc.PostAsJsonAsync(apiUrl, x);
                 kq.Wait();
 
-                return kq.IsCompletedSuccessfully && kq.Result.IsSuccessStatusCode;
+                return kq.Result.IsSuccessStatusCode;
             }
-            catch (Exception)
+            catch
             {
                 return false;
             }
         }
 
-        public static bool suaNguoidung(int id, NguoiDung nd)
+        public static bool sua(int id, NguoiDung x)
         {
             try
             {
-                var kq = hc.PutAsJsonAsync(apiUrl + "/" + id, nd);
+                var kq = hc.PutAsJsonAsync(apiUrl + "/" + id, x);
                 kq.Wait();
 
-                return kq.IsCompletedSuccessfully && kq.Result.IsSuccessStatusCode;
+                return kq.Result.IsSuccessStatusCode;
             }
-            catch (Exception)
+            catch
             {
                 return false;
             }
         }
 
-        public static bool xoaNguoidung(int id)
+        public static bool xoa(int id)
         {
             try
             {
                 var kq = hc.DeleteAsync(apiUrl + "/" + id);
                 kq.Wait();
 
-                return kq.IsCompletedSuccessfully && kq.Result.IsSuccessStatusCode;
+                return kq.Result.IsSuccessStatusCode;
             }
-            catch (Exception)
+            catch
             {
                 return false;
             }

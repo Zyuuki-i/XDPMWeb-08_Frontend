@@ -40,7 +40,23 @@ namespace frontend.MyModels
             }
         }
 
-        public static bool themCTDDH(ChiTietDonDatHangVM ct)
+        public static List<ChiTietDonDatHang> getDSChitietdondathangByMasp(string masp)
+        {
+            try
+            {
+                var kq = hc.GetFromJsonAsync<List<ChiTietDonDatHang>>(apiUrl + @"/SanPham/" + masp);
+                kq.Wait();
+                if (kq.IsCompletedSuccessfully == false)
+                    return new List<ChiTietDonDatHang>();
+                return kq.Result;
+            }
+            catch (Exception)
+            {
+                return new List<ChiTietDonDatHang>();
+            }
+        }
+
+        public static bool themCTDDH(ChiTietDonDatHangDTO ct)
         {
             try
             {

@@ -1,15 +1,15 @@
 ﻿namespace frontend.Models
 {
-    public class ChiTietGiamGiaVM
+    public class ChiTietGiamGiaDTO
     {
         public int MaNd { get; set; }
         public string MaGg { get; set; } = null!;
         public int? Soluong { get; set; }
 
-        public static ChiTietGiamGiaVM chuyenDoi(ChiTietGiamGia ct)
+        public static ChiTietGiamGiaDTO chuyenDoi(ChiTietGiamGia ct)
         {
             if (ct == null) return null;
-            return new ChiTietGiamGiaVM
+            return new ChiTietGiamGiaDTO
             {
                 MaNd = ct.MaNd,
                 MaGg = ct.MaGg,

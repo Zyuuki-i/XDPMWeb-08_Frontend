@@ -37,7 +37,21 @@
                 return new List<Hinh>();
             }
         }
-
+        public static Hinh getHinh(int id)
+        {
+            try
+            {
+                var kq = hc.GetFromJsonAsync<Hinh>(apiUrl + @"/" + id);
+                kq.Wait();
+                if (kq.IsCompletedSuccessfully == false)
+                    return null;
+                return kq.Result;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
 
         public static List<Hinh> getDSHinhByMasp(string masp)
         {
@@ -55,6 +69,65 @@
             }
         }
 
+        public static bool them(Hinh x)
+        {
+            try
+            {
+                var kq = hc.PostAsJsonAsync(apiUrl, x);
+                kq.Wait();
+
+                return kq.Result.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public static bool sua(int id, Hinh x)
+        {
+            try
+            {
+                var kq = hc.PutAsJsonAsync(apiUrl + "/" + id, x);
+                kq.Wait();
+
+                return kq.Result.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public static bool xoa(int id)
+        {
+            try
+            {
+                var kq = hc.DeleteAsync(apiUrl + "/" + id);
+                kq.Wait();
+
+                return kq.Result.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public static bool xoaAll(string masp)
+        {
+            try
+            {
+                var kq = hc.DeleteAsync(apiUrl + "/SanPham/" + masp);
+                kq.Wait();
+
+                return kq.Result.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
 
 
         //end

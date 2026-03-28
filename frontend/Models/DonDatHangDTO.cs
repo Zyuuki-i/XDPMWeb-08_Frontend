@@ -2,7 +2,7 @@
 
 namespace frontend.Models
 {
-    public class DonDatHangVM
+    public class DonDatHangDTO
     {
         public int MaDdh { get; set; }
         public int MaNd { get; set; }
@@ -17,13 +17,13 @@ namespace frontend.Models
         public string Trangthai { get; set; } = null!;
         public string? TtThanhtoan { get; set; }
         public string? Phuongthuc { get; set; }
-        public static DonDatHangVM chuyenDoi(DonDatHang ddh)
+        public static DonDatHangDTO chuyenDoi(DonDatHang ddh)
         {
             if (ddh == null)
             {
                 return null;
             }
-            return new DonDatHangVM
+            return new DonDatHangDTO
             {
                 MaDdh = ddh.MaDdh,
                 MaNd = ddh.MaNd,

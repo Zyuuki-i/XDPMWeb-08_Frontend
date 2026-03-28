@@ -62,7 +62,7 @@ namespace frontend.MyModels
             }
         }
 
-        public static bool themChiTietGiamGia(ChiTietGiamGiaVM dto)
+        public static bool themChiTietGiamGia(ChiTietGiamGiaDTO dto)
         {
             try
             {
@@ -77,7 +77,7 @@ namespace frontend.MyModels
             }
         }
 
-        public static bool suaChiTietGiamGia(ChiTietGiamGiaVM dto)
+        public static bool suaChiTietGiamGia(ChiTietGiamGiaDTO dto)
         {
             try
             {
@@ -93,7 +93,7 @@ namespace frontend.MyModels
             }
         }
 
-        public static bool xoaChiTietGiamGia(ChiTietGiamGiaVM dto)
+        public static bool xoaChiTietGiamGia(ChiTietGiamGiaDTO dto)
         {
             try
             {

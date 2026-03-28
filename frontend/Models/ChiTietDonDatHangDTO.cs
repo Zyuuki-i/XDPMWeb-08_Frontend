@@ -2,7 +2,7 @@
 
 namespace frontend.Models
 {
-    public class ChiTietDonDatHangVM
+    public class ChiTietDonDatHangDTO
     {
         public int MaDdh { get; set; }
         public string MaSp { get; set; } = null!;
@@ -10,13 +10,13 @@ namespace frontend.Models
         public decimal Gia { get; set; }
         public decimal? Thanhtien { get; set; }
 
-        public static ChiTietDonDatHangVM chuyenDoi(ChiTietDonDatHang ctddh)
+        public static ChiTietDonDatHangDTO chuyenDoi(ChiTietDonDatHang ctddh)
         {
             if (ctddh == null)
             {
                 return null;
             }
-            return new ChiTietDonDatHangVM
+            return new ChiTietDonDatHangDTO
             {
                 MaDdh = ctddh.MaDdh,
                 MaSp = ctddh.MaSp,

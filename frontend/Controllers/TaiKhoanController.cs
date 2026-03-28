@@ -98,7 +98,7 @@ namespace frontend.Controllers
                 Diachi = "",
                 Hinh = ""
             };
-            XulyNguoidung.themNguoidung(tk);
+            XulyNguoidung.them(tk);
             TempData["SuccessRegister"] = "Đăng ký thành công, hãy đăng nhập!";
             HttpContext.Session.Remove("EmailVerified");
             return RedirectToAction("DangNhap");
@@ -139,7 +139,7 @@ namespace frontend.Controllers
                 return View();
             }
             tk.Matkhau = Matkhau;
-            XulyNguoidung.suaNguoidung(tk.MaNd,tk);
+            XulyNguoidung.sua(tk.MaNd,tk);
             HttpContext.Session.Remove("EmailVerified");
             return RedirectToAction("DangNhap");
         }
@@ -365,7 +365,7 @@ namespace frontend.Controllers
                 tk.Hinh = tenfile;
             }
 
-            XulyNguoidung.suaNguoidung(tk.MaNd,tk);
+            XulyNguoidung.sua(tk.MaNd,tk);
             return RedirectToAction("XemTaiKhoan", new { email = nd.Email });
         }
 
@@ -425,7 +425,7 @@ namespace frontend.Controllers
                 Sosao = sosao
             };
 
-            if(XulyDanhgia.themDanhgia(danhGiaMoi))
+            if(XulyDanhgia.them(danhGiaMoi))
                 TempData["SuccessDanhGia"] = "Đánh giá thành công!";
 
             return RedirectToAction("xemSanPham", new { id = maNd });
@@ -491,7 +491,7 @@ namespace frontend.Controllers
                 }
                 tk.Hinh = tenfile;
             }
-            XulyNhanVien.suaNhanvien(tk.MaNv, tk);
+            XulyNhanVien.sua(tk.MaNv, tk);
             return RedirectToAction("XemTaiKhoan", new { email = nv.Email });
         }
     }

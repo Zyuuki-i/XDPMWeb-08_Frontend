@@ -44,6 +44,50 @@ namespace frontend.MyModels
             }
         }
 
+        public static bool them(GiamGia x)
+        {
+            try
+            {
+                var kq = hc.PostAsJsonAsync(apiUrl, x);
+                kq.Wait();
+
+                return kq.Result.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public static bool sua(string id, GiamGia x)
+        {
+            try
+            {
+                var kq = hc.PutAsJsonAsync(apiUrl + "/" + id, x);
+                kq.Wait();
+
+                return kq.Result.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public static bool xoa(string id)
+        {
+            try
+            {
+                var kq = hc.DeleteAsync(apiUrl + "/" + id);
+                kq.Wait();
+
+                return kq.Result.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
 
         //end
     }

@@ -5,10 +5,6 @@ namespace frontend.Models
 {
     public partial class GiamGia
     {
-        public GiamGia()
-        {
-            ChiTietGiamGia = new HashSet<ChiTietGiamGia>();
-        }
 
         public string MaGg { get; set; } = null!;
         public string Tenma { get; set; } = null!;
@@ -17,7 +13,6 @@ namespace frontend.Models
         public int? Phantramgiam { get; set; }
         public DateTime? Ngaybd { get; set; }
         public DateTime? Ngaykt { get; set; }
-
-        public virtual ICollection<ChiTietGiamGia> ChiTietGiamGia { get; set; }
+        public int? Tongsl { get; set; }
     }
 }
