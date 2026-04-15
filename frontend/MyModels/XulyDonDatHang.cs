@@ -1,4 +1,4 @@
-﻿using frontend.Areas.Admin.MyModels;
+﻿using frontend.MyModels;
 using frontend.Models;
 
 namespace frontend.MyModels
@@ -57,7 +57,7 @@ namespace frontend.MyModels
             }
         }
 
-        public static bool themDonDatHang(DonDatHangDTO dto)
+        public static bool themDonDatHang(MDonDatHang dto)
         {
             try
             {

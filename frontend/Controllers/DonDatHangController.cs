@@ -329,17 +329,13 @@ namespace frontend.Controllers
 
                 ddh.Trangthai = "Đang xử lý";
                 ddh.TtThanhtoan = "Chưa thanh toán";
-                DonDatHangDTO vm = DonDatHangDTO.chuyenDoi(ddh);
+                MDonDatHang vm = MDonDatHang.chuyenDoi(ddh);
+                vm.chiTietDonDatHangs = new List<ChiTietDonDatHangDTO>();
+                foreach (ChiTietDonDatHang ct in ddh.ChiTietDonDatHangs)
+                {
+                    vm.chiTietDonDatHangs.Add(ChiTietDonDatHangDTO.chuyenDoi(ct));
+                }   
                 XulyDonDatHang.themDonDatHang(vm);
-                List<ChiTietDonDatHangDTO> dsCT = new List<ChiTietDonDatHangDTO>();
-                foreach(ChiTietDonDatHang ct in ddh.ChiTietDonDatHangs)
-                {
-                    dsCT.Add(ChiTietDonDatHangDTO.chuyenDoi(ct));
-                }
-                foreach (ChiTietDonDatHangDTO x in dsCT)
-                {
-                    XulyChiTietDonDatHang.themCTDDH(x);
-                }
                 string maGg = HttpContext.Session.GetString("GG_Ma") ?? "";
                 if (!string.IsNullOrEmpty(maGg))
                 {
@@ -500,7 +496,7 @@ namespace frontend.Controllers
                         }).ToList(),
                         Tongtien = tempDdh.ChiTietDonDatHangs.Sum(t => t.Thanhtien)
                     };
-                    XulyDonDatHang.themDonDatHang(DonDatHangDTO.chuyenDoi(ddh));
+                    //ulyDonDatHang.themDonDatHang(CDonDatHang.chuyenDoi(ddh));
                     List<ChiTietDonDatHangDTO> dsCT = new List<ChiTietDonDatHangDTO>();
                     foreach (ChiTietDonDatHang ct in ddh.ChiTietDonDatHangs)
                     {
